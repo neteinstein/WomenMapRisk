@@ -1,0 +1,9 @@
+{
+  "name": "Women Risk Map",
+  "short_name": "Women Risk Map",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FFF7FE",
+  "theme_color": "#6B3FA0",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

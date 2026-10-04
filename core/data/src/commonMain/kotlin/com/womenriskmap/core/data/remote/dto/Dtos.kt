@@ -61,7 +61,6 @@ data class ProfileDto(
     val status: String,
     val role: String,
     @SerialName("email_confirmed") val emailConfirmed: Boolean,
-    @SerialName("location_history_enabled") val locationHistoryEnabled: Boolean = false,
 ) {
     fun toDomain() = UserProfile(
         id = id,

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Present so per-app language lists Português (generateLocaleConfig). -->
+    <string name="locale_marker">pt</string>
+</resources>

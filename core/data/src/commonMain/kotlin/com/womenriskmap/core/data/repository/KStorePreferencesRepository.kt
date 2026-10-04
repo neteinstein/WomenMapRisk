@@ -18,6 +18,8 @@ class KStorePreferencesRepository(private val stores: LocalStores, scope: Corout
         prefs.map { it.locationHistoryEnabled }.stateIn(scope, SharingStarted.Eagerly, false)
     override val lastKnownLocation: StateFlow<GeoPoint?> =
         prefs.map { it.lastKnownLocation }.stateIn(scope, SharingStarted.Eagerly, null)
+    override val welcomeSeen: StateFlow<Boolean> =
+        prefs.map { it.welcomeSeen }.stateIn(scope, SharingStarted.Eagerly, false)
 
     override suspend fun setLocationHistoryEnabled(enabled: Boolean) = stores.preferences.update {
         val current = it ?: StoredPreferences()
@@ -30,4 +32,6 @@ class KStorePreferencesRepository(private val stores: LocalStores, scope: Corout
         // Even when enabled, only the anonymised zone centre is kept on-device.
         if (current.locationHistoryEnabled) current.copy(lastKnownLocation = LocationAnonymizer.snap(point)) else current
     }
+
+    override suspend fun setWelcomeSeen() = stores.preferences.update { (it ?: StoredPreferences()).copy(welcomeSeen = true) }
 }

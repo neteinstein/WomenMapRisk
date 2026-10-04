@@ -19,8 +19,13 @@ interface PreferencesRepository {
     val locationHistoryEnabled: StateFlow<Boolean>
     val lastKnownLocation: StateFlow<GeoPoint?>
 
+    /** Spec §4 Ecrã 1 is shown on first launch only. */
+    val welcomeSeen: StateFlow<Boolean>
+
     suspend fun setLocationHistoryEnabled(enabled: Boolean)
 
     /** Persisted only when location history is enabled; otherwise ignored. */
     suspend fun rememberLocation(point: GeoPoint)
+
+    suspend fun setWelcomeSeen()
 }

@@ -243,6 +243,10 @@ class FakeConnectivityMonitor(online: Boolean = true) : ConnectivityMonitor {
 class FakePreferencesRepository : PreferencesRepository {
     override val locationHistoryEnabled = MutableStateFlow(false)
     override val lastKnownLocation = MutableStateFlow<GeoPoint?>(null)
+    override val welcomeSeen = MutableStateFlow(false)
+    override suspend fun setWelcomeSeen() {
+        welcomeSeen.value = true
+    }
     override suspend fun setLocationHistoryEnabled(enabled: Boolean) {
         locationHistoryEnabled.value = enabled
         if (!enabled) lastKnownLocation.value = null

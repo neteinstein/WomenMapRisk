@@ -17,6 +17,7 @@ data class AreaCache(val reports: List<Report> = emptyList(), val fetchedAt: Ins
 data class StoredPreferences(
     val locationHistoryEnabled: Boolean = false,
     val lastKnownLocation: GeoPoint? = null,
+    val welcomeSeen: Boolean = false,
 )
 
 @Serializable
