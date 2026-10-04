@@ -51,6 +51,7 @@ include(":composeApp")
 include(":core:domain")
 include(":core:data")
 include(":core:designsystem")
+include(":core:map")
 include(":core:testing")
 
 include(":feature:onboarding")

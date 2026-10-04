@@ -6,7 +6,7 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.maplibre.compose)
+            implementation(projects.core.map)
         }
     }
 }

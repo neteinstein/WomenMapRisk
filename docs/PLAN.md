@@ -82,6 +82,8 @@ composeApp/               # com.android.kotlin.multiplatform.library: App(), ui/
                           #   iosMain MainViewController, wasmJsMain main.kt + index.html
 core/domain/              # pure KMP (no Compose): models, repo interfaces, shared use cases, rules (ZoneRiskCalculator, LocationAnonymizer, ReportPolicy)
 core/data/                # Supabase client, KStore cache, Photon geocoder (Ktor), connectivity, expect/actual LocationProvider
+core/map/                 # SafetyMap + PinPickerMap: the ONLY MapLibre-aware code (engine swappable)
+core/testing/             # shared fakes for commonTest
 core/designsystem/        # ui/theme (M3 light/dark, dynamic colour on Android 12+), shared components, compose resources (strings EN + PT)
 feature/onboarding/       # Screen 1 Welcome
 feature/auth/             # Screen 2 Sign-up/login (email + Google via compose-auth), errors
@@ -240,6 +242,8 @@ Optional `deploy-web.yml` on main publishes the wasm build to GitHub Pages (free
 - **2026-10-05: map viewport detection** uses `snapshotFlow { isCameraMoving }` instead of `MapEvent.CameraMoveEnded`, which did not fire on web.
 - **2026-10-05: Koin `singleOf(::X)` injects defaulted constructor params too.** Use `single { X() }` for classes with defaults (e.g. `ZoneRiskCalculator`). `verify()` on the JVM does not catch this.
 
+- **2026-10-05: new `core:map` module.** It is the only module that touches MapLibre; `feature:map` and `feature:report` both use it, because features must not depend on each other.
+
 ## Progress tracking: `docs/PLAN.md` in the repo
 The first action of implementation is to copy this whole plan into the repo as **`docs/PLAN.md`**. It becomes the living tracker.
 - The stage list below goes into the file as GitHub task-list checkboxes (`- [ ]`).
@@ -302,9 +306,13 @@ The first action of implementation is to copy this whole plan into the repo as *
   - ✅ 2026-10-05: 14 MapViewModel tests are green.
     - Verified on web (MapLibre JS, dark style): zones with "!" and "×" symbols, legend, zone sheet with the Photon street name, "location off → Porto" banner, bottom navigation.
     - Android map rendering will be verified with the polish pass (Stage 12).
-- [ ] **Stage 8: feature:report.**
+- [x] **Stage 8: feature:report.**
   - Report form in ≤6 taps, description warning, confirmation message, aggression → emergency contacts and support, edit/delete within 24 h.
   - Exit: VM tests green.
+  - ✅ 2026-10-05: 11 ReportViewModel tests are green.
+    - Fastest path is 3 taps: Reportar → type → Enviar.
+    - New `core:map` module (SafetyMap + PinPickerMap) shared by the map and report features.
+    - The visitor prompt on "Reportar" was checked on web.
 - [ ] **Stage 9: feature:saved + feature:invites.**
   - Saved list with swipe to delete.
   - Invite progress (locked/unlocked), create/share/revoke, women-only reminder, `touch_usage` on app start.

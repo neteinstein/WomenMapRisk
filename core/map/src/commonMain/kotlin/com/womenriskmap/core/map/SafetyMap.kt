@@ -1,4 +1,4 @@
-package com.womenriskmap.feature.map.ui.components
+package com.womenriskmap.core.map
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
@@ -176,5 +176,5 @@ fun zonesGeoJson(zones: List<Zone>): String = buildJsonObject {
     )
 }.toString()
 
-private const val LIGHT_STYLE = "https://tiles.openfreemap.org/styles/positron"
-private const val DARK_STYLE = "https://tiles.openfreemap.org/styles/dark"
+internal const val LIGHT_STYLE = "https://tiles.openfreemap.org/styles/positron"
+internal const val DARK_STYLE = "https://tiles.openfreemap.org/styles/dark"

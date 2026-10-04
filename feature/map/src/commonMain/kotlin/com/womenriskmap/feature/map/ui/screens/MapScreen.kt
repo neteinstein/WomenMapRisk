@@ -50,10 +50,10 @@ import com.womenriskmap.core.designsystem.resources.*
 import com.womenriskmap.core.designsystem.theme.Spacing
 import com.womenriskmap.core.domain.model.GeoPoint
 import com.womenriskmap.core.domain.model.PilotCity
-import com.womenriskmap.feature.map.ui.components.CameraCommand
+import com.womenriskmap.core.map.CameraCommand
+import com.womenriskmap.core.map.SafetyMap
 import com.womenriskmap.feature.map.ui.components.FiltersSheet
 import com.womenriskmap.feature.map.ui.components.MapSearchBar
-import com.womenriskmap.feature.map.ui.components.SafetyMap
 import com.womenriskmap.feature.map.ui.components.VisitorPrompt
 import com.womenriskmap.feature.map.ui.components.ZoneSheet
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -13,6 +13,7 @@ import com.womenriskmap.core.data.repository.SupabaseInviteRepository
 import com.womenriskmap.core.data.repository.SupabaseReportRepository
 import com.womenriskmap.core.data.repository.SupabaseSavedZoneRepository
 import com.womenriskmap.core.data.repository.SupabaseSessionRepository
+import com.womenriskmap.core.domain.model.GeoPoint
 import com.womenriskmap.core.domain.repository.ConnectivityMonitor
 import com.womenriskmap.core.domain.repository.GeocodingRepository
 import com.womenriskmap.core.domain.repository.InviteRepository
@@ -32,6 +33,8 @@ import com.womenriskmap.feature.map.domain.FlagReportUseCase
 import com.womenriskmap.feature.map.domain.LoadZoneDetailUseCase
 import com.womenriskmap.feature.map.ui.screens.MapFocus
 import com.womenriskmap.feature.map.ui.screens.MapViewModel
+import com.womenriskmap.feature.report.domain.SubmitReportUseCase
+import com.womenriskmap.feature.report.ui.screens.ReportViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -76,6 +79,7 @@ val appModule = module {
     factoryOf(::LoadZoneDetailUseCase)
     factoryOf(::ConfirmReportUseCase)
     factoryOf(::FlagReportUseCase)
+    factoryOf(::SubmitReportUseCase)
 
     // ViewModels (one line per screen; route parameters arrive via parametersOf)
     viewModelOf(::AppViewModel)
@@ -85,4 +89,5 @@ val appModule = module {
     viewModel { (focus: MapFocus?) ->
         MapViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), focus)
     }
+    viewModel { (near: GeoPoint?, editingId: String?) -> ReportViewModel(get(), get(), get(), get(), get(), get(), near, editingId) }
 }

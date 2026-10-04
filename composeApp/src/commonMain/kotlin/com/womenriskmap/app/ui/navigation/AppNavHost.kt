@@ -39,7 +39,8 @@ import com.womenriskmap.feature.map.ui.navigation.MapRoute
 import com.womenriskmap.feature.map.ui.navigation.mapScreen
 import com.womenriskmap.feature.onboarding.ui.navigation.WelcomeRoute
 import com.womenriskmap.feature.onboarding.ui.navigation.welcomeScreen
-import kotlinx.serialization.Serializable
+import com.womenriskmap.feature.report.ui.navigation.ReportRoute
+import com.womenriskmap.feature.report.ui.navigation.reportScreen
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -138,7 +139,7 @@ fun AppNavHost(
             )
             composable<SavedRoute> { Placeholder("Saved") }
             composable<ProfileRoute> { Placeholder("Profile") }
-            composable<ReportRoute> { Placeholder("Report") }
+            reportScreen(onClose = { navController.popBackStack() })
         }
     }
 }
@@ -147,6 +148,3 @@ fun AppNavHost(
 private fun Placeholder(name: String) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(name) }
 }
-
-@Serializable
-data class ReportRoute(val lat: Double? = null, val lng: Double? = null)
