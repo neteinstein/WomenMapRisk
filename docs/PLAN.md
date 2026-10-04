@@ -345,9 +345,12 @@ The first action of implementation is to copy this whole plan into the repo as *
     - Animations: welcome entrance, sheet and content transitions, confirm heart pulse plus haptic, animated banners and progress.
     - Accessibility: risk symbols carry content descriptions, checkbox rows use the full row as the touch target, and colour is never the only cue.
     - ⏸ Known limitation: map zones are not individually exposed to screen readers (MapLibre canvas). The zone sheet and Saved list are accessible.
-- [ ] **Stage 13: CI/CD.**
+- [x] **Stage 13: CI/CD.**
   - `ci.yml` parallel jobs (android build+R8, unit tests+Kover, lint, iOS, web, supabase-db), optional `deploy-web.yml`, PR template.
   - Exit: workflow YAML validated, and a PR opened so CI runs.
+  - ✅ 2026-10-05: `ci.yml` has 6 parallel jobs (build-android with R8, unit-tests with Kover summary, lint with ktlint + Android lint + strings parity, build-ios, build-web, supabase-db). Also `deploy-web.yml` (GitHub Pages) and the PR template.
+    - YAML parses. Every job's command was run locally and is green, except `supabase-db` (no Docker locally; the SQL harness equivalent is green).
+    - ⏸ Opening a PR is pending user approval (pushing to the remote is outward-facing).
 - [ ] **Stage 14: Docs and agent guidance.**
   - `AGENTS.md`, `CLAUDE.md`, `CI_CD.md`, `.claude/skills/*`, README refresh.
   - Exit: final verification below, all boxes ticked or ⏸ with reasons.
