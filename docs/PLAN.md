@@ -249,9 +249,10 @@ The first action of implementation is to copy this whole plan into the repo as *
   - Verified version catalog, wrapper, settings, `build-logic` convention plugins, `*.ci` placeholders, ~~BuildKonfig~~ (see deviations).
   - Exit: `./gradlew help` green.
   - ✅ 2026-10-04: Gradle 9.8.0, Kotlin 2.4.20, CMP 1.12.1, AGP 9.4.1. `./gradlew help` and `:core:domain:testDebugUnitTest` are green.
-- [ ] **Stage 2: core:domain + tests.**
+- [x] **Stage 2: core:domain + tests.**
   - Models, repo interfaces, ZoneRiskCalculator, LocationAnonymizer, ReportPolicy, DescriptionGuard, InviteEligibility, InviteCode, EmergencyContacts.
   - Exit: domain tests green on JVM.
+  - ✅ 2026-10-04: 47 tests green (`:core:domain:testDebugUnitTest`), ktlint clean. Zone grid is ~100 m cells, zone id `z{lat}_{lng}`, shared SQL vector `z45721_-7205`. The ktlint style is `intellij_idea`, since `ktlint_official` was too noisy.
 - [ ] **Stage 3: core:data + core:designsystem.**
   - Supabase client, KStore cache, Photon geocoder, LocationProvider expect/actual.
   - Theme (light/dark), shared components, EN/PT string resources.
