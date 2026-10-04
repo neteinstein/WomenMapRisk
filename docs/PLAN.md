@@ -283,9 +283,14 @@ The first action of implementation is to copy this whole plan into the repo as *
     - All green on real Postgres 16 via the new Docker-free `scripts/sql-harness/run.sh`, which emulates auth, pgcrypto, pgTAP and realtime.
     - The shared zone vector `z45721_-7205` matches Kotlin.
     - ⏸ `supabase test db` on the real Supabase stack has not run locally (no Docker); the CI `supabase-db` job covers it.
-- [ ] **Stage 6: feature:onboarding + feature:auth.**
+- [x] **Stage 6: feature:onboarding + feature:auth.**
   - Welcome screen, sign-up/login with invite code and women-only declaration, Google sign-in, invite-code gate for `pending_invite` users, error mapping.
   - Exit: VM tests green.
+  - ✅ 2026-10-05: Auth, InviteGate and CheckEmail VM tests and the SignUpValidator tests are green.
+    - App navigation reacts to session gates (welcome, invite gate, main).
+    - The web `?invite=CODE` link pre-fills sign-up.
+    - Welcome and sign-up were checked rendering on web (dark theme).
+    - `.claude/launch.json` holds the `web` dev-server config.
 - [ ] **Stage 7: feature:map.**
   - Map centred on the user or Porto, coloured zones with symbols and legend, search, filters, zone bottom sheet (confirm/flag/save/report-here), empty and offline states, realtime refresh.
   - Exit: VM tests green, plus the map verified on web/Android.

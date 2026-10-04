@@ -21,10 +21,15 @@ import com.womenriskmap.core.domain.repository.SavedZoneRepository
 import com.womenriskmap.core.domain.repository.SessionRepository
 import com.womenriskmap.core.domain.rules.ZoneRiskCalculator
 import com.womenriskmap.core.domain.usecase.LoadZonesUseCase
+import com.womenriskmap.feature.auth.ui.screens.AuthMode
+import com.womenriskmap.feature.auth.ui.screens.AuthViewModel
+import com.womenriskmap.feature.auth.ui.screens.CheckEmailViewModel
+import com.womenriskmap.feature.auth.ui.screens.InviteGateViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -60,6 +65,9 @@ val appModule = module {
     singleOf(::ZoneRiskCalculator)
     singleOf(::LoadZonesUseCase)
 
-    // App-level ViewModels
+    // ViewModels (one line per screen; route parameters arrive via parametersOf)
     viewModelOf(::AppViewModel)
+    viewModel { (mode: AuthMode, invite: String?) -> AuthViewModel(get(), mode, invite) }
+    viewModel { (email: String) -> CheckEmailViewModel(email, get()) }
+    viewModelOf(::InviteGateViewModel)
 }

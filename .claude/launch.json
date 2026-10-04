@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "./gradlew",
+      "runtimeArgs": [":composeApp:jsBrowserDevelopmentRun", "--continuous", "-q"],
+      "port": 8080
+    }
+  ]
+}
