@@ -8,31 +8,20 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import com.womenriskmap.core.designsystem.components.countryLabel
 import com.womenriskmap.core.designsystem.resources.*
 import com.womenriskmap.core.designsystem.theme.Spacing
-import com.womenriskmap.core.domain.rules.Countries
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -65,33 +54,6 @@ fun PasswordField(
         },
         modifier = modifier.fillMaxWidth(),
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CountryField(selected: String, onSelected: (String) -> Unit, modifier: Modifier = Modifier) {
-    var expanded by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }, modifier = modifier) {
-        OutlinedTextField(
-            value = stringResource(countryLabel(selected)),
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(stringResource(Res.string.auth_country)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            Countries.supported.forEach { code ->
-                DropdownMenuItem(
-                    text = { Text(stringResource(countryLabel(code))) },
-                    onClick = {
-                        onSelected(code)
-                        expanded = false
-                    },
-                )
-            }
-        }
-    }
 }
 
 /** Checkbox row where the whole row is the touch target (accessibility: ≥48dp, label clickable). */

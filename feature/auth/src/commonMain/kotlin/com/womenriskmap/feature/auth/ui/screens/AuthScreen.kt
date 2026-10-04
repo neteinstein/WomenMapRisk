@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.womenriskmap.core.designsystem.components.CountryField
 import com.womenriskmap.core.designsystem.components.PrimaryButton
 import com.womenriskmap.core.designsystem.components.SecondaryButton
 import com.womenriskmap.core.designsystem.components.messageRes
@@ -57,7 +58,6 @@ import com.womenriskmap.core.designsystem.theme.Spacing
 import com.womenriskmap.core.designsystem.theme.WomenRiskMapTheme
 import com.womenriskmap.feature.auth.domain.SignUpError
 import com.womenriskmap.feature.auth.ui.components.CheckRow
-import com.womenriskmap.feature.auth.ui.components.CountryField
 import com.womenriskmap.feature.auth.ui.components.PasswordField
 import org.jetbrains.compose.resources.stringResource
 

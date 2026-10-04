@@ -321,9 +321,14 @@ The first action of implementation is to copy this whole plan into the repo as *
     - Saved zones show their current colour and support swipe to delete with undo. Tapping a zone opens the map focused on it.
     - Invites: progress bars, a required women-only confirmation, share text with a `?invite=` link, revoke.
     - `touch_usage` runs from AppViewModel (Stage 4).
-- [ ] **Stage 10: feature:profile.**
+- [x] **Stage 10: feature:profile.**
   - Profile, my reports, settings and privacy (location permission rationale, location history toggle), data export, account deletion, logout, PT/EN switch.
   - Exit: VM tests green.
+  - ✅ 2026-10-05: 6 Profile/Settings VM tests are green.
+    - Visitor profile and Settings were checked on web.
+    - The PT/EN switch opens the OS per-app language page (see deviations).
+    - `CountryField` moved to designsystem.
+    - Gotcha found: running Gradle builds while the `--continuous` web dev server is running corrupts the JS outputs; stop the server first.
 - [ ] **Stage 11: feature:moderation.**
   - Queue (flagged reports and establishment reports), approve/remove/block with reason, counters, inviter chain, revoke invites.
   - Exit: VM tests green, verified on web.

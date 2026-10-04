@@ -7,9 +7,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -19,14 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.womenriskmap.app.AppGate
@@ -35,11 +30,17 @@ import com.womenriskmap.feature.auth.ui.navigation.AuthRoute
 import com.womenriskmap.feature.auth.ui.navigation.CheckEmailRoute
 import com.womenriskmap.feature.auth.ui.navigation.InviteGateRoute
 import com.womenriskmap.feature.auth.ui.navigation.authScreens
+import com.womenriskmap.feature.invites.ui.navigation.InvitesRoute
 import com.womenriskmap.feature.invites.ui.navigation.invitesScreen
 import com.womenriskmap.feature.map.ui.navigation.MapRoute
 import com.womenriskmap.feature.map.ui.navigation.mapScreen
 import com.womenriskmap.feature.onboarding.ui.navigation.WelcomeRoute
 import com.womenriskmap.feature.onboarding.ui.navigation.welcomeScreen
+import com.womenriskmap.feature.profile.ui.navigation.HelpRoute
+import com.womenriskmap.feature.profile.ui.navigation.SettingsRoute
+import com.womenriskmap.feature.profile.ui.navigation.TermsRoute
+import com.womenriskmap.feature.profile.ui.navigation.profileScreens
+import com.womenriskmap.feature.profile.ui.screens.ProfileActions
 import com.womenriskmap.feature.report.ui.navigation.ReportRoute
 import com.womenriskmap.feature.report.ui.navigation.reportScreen
 import com.womenriskmap.feature.saved.ui.navigation.savedScreen
@@ -148,13 +149,25 @@ fun AppNavHost(
                 },
             )
             invitesScreen(onBack = { navController.popBackStack() })
-            composable<ProfileRoute> { Placeholder("Profile") }
+            profileScreens(
+                contentPadding = { contentPadding },
+                actions = ProfileActions(
+                    onSettings = { navController.navigate(SettingsRoute) },
+                    onHelp = { navController.navigate(HelpRoute) },
+                    onTerms = { navController.navigate(TermsRoute) },
+                    onInvite = { navController.navigate(InvitesRoute) },
+                    onModeration = onOpenModeration(navController),
+                    onEditReport = { id -> navController.navigate(ReportRoute(reportId = id)) },
+                    onSignUp = { navController.navigate(AuthRoute()) },
+                    onLogin = { navController.navigate(AuthRoute(login = true)) },
+                ),
+                onBack = { navController.popBackStack() },
+                onAccountDeleted = { navController.navigate(MapRoute()) { popUpTo(0) { inclusive = true } } },
+            )
             reportScreen(onClose = { navController.popBackStack() })
         }
     }
 }
 
-@Composable
-private fun Placeholder(name: String) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(name) }
-}
+/** Moderation panel (spec §4 Ecrã 10) is wired in Stage 11. */
+private fun onOpenModeration(navController: NavHostController): () -> Unit = {}
