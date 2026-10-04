@@ -276,9 +276,13 @@ The first action of implementation is to copy this whole plan into the repo as *
     - The Koin graph is verified by `AppModuleTest` (androidHostTest).
     - The simulator build excludes x86_64 (no iosX64 target).
     - Crashlytics on iOS ⏸: deferred, because the hand-authored SPM package entry is fragile. Android Crashlytics is wired.
-- [ ] **Stage 5: Supabase backend.**
+- [x] **Stage 5: Supabase backend.**
   - Migrations (tables, RLS, triggers, RPCs including invites/usage), seed with Porto sample data, pgTAP tests.
   - Exit: `supabase test db` green, or ⏸ if Docker is unavailable locally.
+  - ✅ 2026-10-05: 3 migrations (schema, rules/triggers, API), `seed.sql` (Porto) and 3 pgTAP files (37 assertions).
+    - All green on real Postgres 16 via the new Docker-free `scripts/sql-harness/run.sh`, which emulates auth, pgcrypto, pgTAP and realtime.
+    - The shared zone vector `z45721_-7205` matches Kotlin.
+    - ⏸ `supabase test db` on the real Supabase stack has not run locally (no Docker); the CI `supabase-db` job covers it.
 - [ ] **Stage 6: feature:onboarding + feature:auth.**
   - Welcome screen, sign-up/login with invite code and women-only declaration, Google sign-in, invite-code gate for `pending_invite` users, error mapping.
   - Exit: VM tests green.
