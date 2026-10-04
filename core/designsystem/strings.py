@@ -2,6 +2,7 @@
 """
 Single source for all user-facing strings (EN default + PT).
 Run:  python3 core/designsystem/strings.py   -> regenerates composeResources/values{,-pt}/strings.xml
+Placeholders MUST be positional (%1$s, %1$d): Compose resources ignore bare %d/%s.
 PT copy marked [spec] is VERBATIM from docs/spec/especificacao-funcional-v1.md, so do not reword it.
 See .claude/skills/spec-copy-sync.
 """
@@ -268,13 +269,13 @@ S = [
 
 P = [
 # key, EN(one, other), PT(one, other)
-("zone_reports", ("%d report", "%d reports"), ("%d reporte", "%d reportes")),
-("zone_confirmed_by", ("%d woman confirmed", "%d women confirmed"), ("%d mulher confirmou", "%d mulheres confirmaram")),
-("report_confirmations", ("%d confirmation", "%d confirmations"), ("%d confirmação", "%d confirmações")),
-("moderation_flags_count", ("%d flag", "%d flags"), ("%d denúncia", "%d denúncias")),
-("time_minutes_ago", ("%d min ago", "%d min ago"), ("há %d min", "há %d min")),
-("time_hours_ago", ("%d hour ago", "%d hours ago"), ("há %d hora", "há %d horas")),
-("time_days_ago", ("%d day ago", "%d days ago"), ("há %d dia", "há %d dias")),
+("zone_reports", ("%1$d report", "%1$d reports"), ("%1$d reporte", "%1$d reportes")),
+("zone_confirmed_by", ("%1$d woman confirmed", "%1$d women confirmed"), ("%1$d mulher confirmou", "%1$d mulheres confirmaram")),
+("report_confirmations", ("%1$d confirmation", "%1$d confirmations"), ("%1$d confirmação", "%1$d confirmações")),
+("moderation_flags_count", ("%1$d flag", "%1$d flags"), ("%1$d denúncia", "%1$d denúncias")),
+("time_minutes_ago", ("%1$d min ago", "%1$d min ago"), ("há %1$d min", "há %1$d min")),
+("time_hours_ago", ("%1$d hour ago", "%1$d hours ago"), ("há %1$d hora", "há %1$d horas")),
+("time_days_ago", ("%1$d day ago", "%1$d days ago"), ("há %1$d dia", "há %1$d dias")),
 ]
 
 def esc(v):

@@ -3,7 +3,6 @@
 build/
 !**/src/**/build/
 .kotlin/
-kotlin-js-store/
 local.properties
 captures/
 *.hprof

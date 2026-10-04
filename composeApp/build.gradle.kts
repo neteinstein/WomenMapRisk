@@ -14,9 +14,7 @@ kotlin {
         }
     }
     js {
-        browser {
-            commonWebpackConfig { outputFileName = "composeApp.js" }
-        }
+        browser() // outputs composeApp.js (module name), referenced by jsMain/resources/index.html
         binaries.executable()
     }
 
@@ -49,6 +47,14 @@ kotlin {
     sourceSets {
         getByName("androidHostTest").dependencies {
             implementation(libs.koin.test)
+        }
+    }
+}
+
+kotlin {
+    sourceSets {
+        jsMain.dependencies {
+            implementation(libs.maplibre.compose)
         }
     }
 }

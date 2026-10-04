@@ -264,31 +264,31 @@
     <string name="moderation_flag_reasons">Motivos das denúncias</string>
     <string name="moderation_refresh">Atualizar</string>
     <plurals name="zone_reports">
-        <item quantity="one">%d reporte</item>
-        <item quantity="other">%d reportes</item>
+        <item quantity="one">%1$d reporte</item>
+        <item quantity="other">%1$d reportes</item>
     </plurals>
     <plurals name="zone_confirmed_by">
-        <item quantity="one">%d mulher confirmou</item>
-        <item quantity="other">%d mulheres confirmaram</item>
+        <item quantity="one">%1$d mulher confirmou</item>
+        <item quantity="other">%1$d mulheres confirmaram</item>
     </plurals>
     <plurals name="report_confirmations">
-        <item quantity="one">%d confirmação</item>
-        <item quantity="other">%d confirmações</item>
+        <item quantity="one">%1$d confirmação</item>
+        <item quantity="other">%1$d confirmações</item>
     </plurals>
     <plurals name="moderation_flags_count">
-        <item quantity="one">%d denúncia</item>
-        <item quantity="other">%d denúncias</item>
+        <item quantity="one">%1$d denúncia</item>
+        <item quantity="other">%1$d denúncias</item>
     </plurals>
     <plurals name="time_minutes_ago">
-        <item quantity="one">há %d min</item>
-        <item quantity="other">há %d min</item>
+        <item quantity="one">há %1$d min</item>
+        <item quantity="other">há %1$d min</item>
     </plurals>
     <plurals name="time_hours_ago">
-        <item quantity="one">há %d hora</item>
-        <item quantity="other">há %d horas</item>
+        <item quantity="one">há %1$d hora</item>
+        <item quantity="other">há %1$d horas</item>
     </plurals>
     <plurals name="time_days_ago">
-        <item quantity="one">há %d dia</item>
-        <item quantity="other">há %d dias</item>
+        <item quantity="one">há %1$d dia</item>
+        <item quantity="other">há %1$d dias</item>
     </plurals>
 </resources>

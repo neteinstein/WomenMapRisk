@@ -264,31 +264,31 @@
     <string name="moderation_flag_reasons">Flag reasons</string>
     <string name="moderation_refresh">Refresh</string>
     <plurals name="zone_reports">
-        <item quantity="one">%d report</item>
-        <item quantity="other">%d reports</item>
+        <item quantity="one">%1$d report</item>
+        <item quantity="other">%1$d reports</item>
     </plurals>
     <plurals name="zone_confirmed_by">
-        <item quantity="one">%d woman confirmed</item>
-        <item quantity="other">%d women confirmed</item>
+        <item quantity="one">%1$d woman confirmed</item>
+        <item quantity="other">%1$d women confirmed</item>
     </plurals>
     <plurals name="report_confirmations">
-        <item quantity="one">%d confirmation</item>
-        <item quantity="other">%d confirmations</item>
+        <item quantity="one">%1$d confirmation</item>
+        <item quantity="other">%1$d confirmations</item>
     </plurals>
     <plurals name="moderation_flags_count">
-        <item quantity="one">%d flag</item>
-        <item quantity="other">%d flags</item>
+        <item quantity="one">%1$d flag</item>
+        <item quantity="other">%1$d flags</item>
     </plurals>
     <plurals name="time_minutes_ago">
-        <item quantity="one">%d min ago</item>
-        <item quantity="other">%d min ago</item>
+        <item quantity="one">%1$d min ago</item>
+        <item quantity="other">%1$d min ago</item>
     </plurals>
     <plurals name="time_hours_ago">
-        <item quantity="one">%d hour ago</item>
-        <item quantity="other">%d hours ago</item>
+        <item quantity="one">%1$d hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
     </plurals>
     <plurals name="time_days_ago">
-        <item quantity="one">%d day ago</item>
-        <item quantity="other">%d days ago</item>
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
     </plurals>
 </resources>

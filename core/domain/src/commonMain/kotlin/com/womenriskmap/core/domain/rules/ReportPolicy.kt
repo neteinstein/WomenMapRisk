@@ -1,5 +1,6 @@
 package com.womenriskmap.core.domain.rules
 
+import com.womenriskmap.core.domain.loadTimeZoneDatabase
 import com.womenriskmap.core.domain.model.GeoPoint
 import com.womenriskmap.core.domain.model.Report
 import com.womenriskmap.core.domain.model.UserProfile
@@ -19,7 +20,10 @@ object ReportPolicy {
     const val FLAGS_TO_HIDE = 3
 
     /** "Day" boundaries follow the pilot city's timezone. */
-    val policyTimeZone: TimeZone = TimeZone.of("Europe/Lisbon")
+    val policyTimeZone: TimeZone by lazy {
+        loadTimeZoneDatabase()
+        TimeZone.of("Europe/Lisbon")
+    }
 
     sealed interface SubmitCheck {
         data object Allowed : SubmitCheck

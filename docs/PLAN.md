@@ -235,6 +235,11 @@ Optional `deploy-web.yml` on main publishes the wasm build to GitHub Pages (free
 - **2026-10-04: Google sign-in uses Supabase OAuth** (browser + `womenriskmap://login-callback` deep link) instead of compose-auth native one-tap. This keeps auth out of Composables and works on all three platforms. Native one-tap is a follow-up.
 - **2026-10-04: realtime uses DB broadcast** (`realtime.send` to topic `reports-feed`, no personal data) instead of postgres_changes, which would leak row data under RLS.
 
+- **2026-10-05: demo mode.** Without a configured Supabase project (`AppConfig.isConfigured == false`), `DemoReportRepository` serves read-only sample Porto reports, so the app can be explored (web preview, reviews) with no backend.
+- **2026-10-05: Kotlin/JS timezone data.** kotlinx-datetime on JS needs `@js-joda/timezone` (npm, version in the catalog), loaded via `loadTimeZoneDatabase()` expect/actual. `kotlin-js-store/yarn.lock` is committed; run `./gradlew kotlinUpgradeYarnLock` after npm dependency changes.
+- **2026-10-05: map viewport detection** uses `snapshotFlow { isCameraMoving }` instead of `MapEvent.CameraMoveEnded`, which did not fire on web.
+- **2026-10-05: Koin `singleOf(::X)` injects defaulted constructor params too.** Use `single { X() }` for classes with defaults (e.g. `ZoneRiskCalculator`). `verify()` on the JVM does not catch this.
+
 ## Progress tracking: `docs/PLAN.md` in the repo
 The first action of implementation is to copy this whole plan into the repo as **`docs/PLAN.md`**. It becomes the living tracker.
 - The stage list below goes into the file as GitHub task-list checkboxes (`- [ ]`).
@@ -291,9 +296,12 @@ The first action of implementation is to copy this whole plan into the repo as *
     - The web `?invite=CODE` link pre-fills sign-up.
     - Welcome and sign-up were checked rendering on web (dark theme).
     - `.claude/launch.json` holds the `web` dev-server config.
-- [ ] **Stage 7: feature:map.**
+- [x] **Stage 7: feature:map.**
   - Map centred on the user or Porto, coloured zones with symbols and legend, search, filters, zone bottom sheet (confirm/flag/save/report-here), empty and offline states, realtime refresh.
   - Exit: VM tests green, plus the map verified on web/Android.
+  - ✅ 2026-10-05: 14 MapViewModel tests are green.
+    - Verified on web (MapLibre JS, dark style): zones with "!" and "×" symbols, legend, zone sheet with the Photon street name, "location off → Porto" banner, bottom navigation.
+    - Android map rendering will be verified with the polish pass (Stage 12).
 - [ ] **Stage 8: feature:report.**
   - Report form in ≤6 taps, description warning, confirmation message, aggression → emergency contacts and support, edit/delete within 24 h.
   - Exit: VM tests green.

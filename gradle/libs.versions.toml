@@ -34,6 +34,8 @@ supabase = "3.8.0"
 # Maps & storage
 maplibre-compose = "0.19.0"
 kstore = "1.1.0"
+# npm (Kotlin/JS): timezone database for kotlinx-datetime in the browser
+js-joda-timezone = "3.0.0"
 
 # Firebase (Crashlytics only)
 firebase-bom = "34.19.0"

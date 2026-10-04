@@ -1,6 +1,8 @@
 package com.womenriskmap.app.di
 
 import com.womenriskmap.app.AppViewModel
+import com.womenriskmap.core.data.config.AppConfig
+import com.womenriskmap.core.data.demo.DemoReportRepository
 import com.womenriskmap.core.data.geocoding.PhotonGeocodingRepository
 import com.womenriskmap.core.data.local.LocalStores
 import com.womenriskmap.core.data.platform.PlatformConnectivityMonitor
@@ -25,9 +27,15 @@ import com.womenriskmap.feature.auth.ui.screens.AuthMode
 import com.womenriskmap.feature.auth.ui.screens.AuthViewModel
 import com.womenriskmap.feature.auth.ui.screens.CheckEmailViewModel
 import com.womenriskmap.feature.auth.ui.screens.InviteGateViewModel
+import com.womenriskmap.feature.map.domain.ConfirmReportUseCase
+import com.womenriskmap.feature.map.domain.FlagReportUseCase
+import com.womenriskmap.feature.map.domain.LoadZoneDetailUseCase
+import com.womenriskmap.feature.map.ui.screens.MapFocus
+import com.womenriskmap.feature.map.ui.screens.MapViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -55,19 +63,26 @@ val appModule = module {
 
     // Repositories (core contracts -> data implementations)
     single<SessionRepository> { SupabaseSessionRepository(get(), get(), get(AppScope)) }
-    single<ReportRepository> { SupabaseReportRepository(get(), get(), get()) }
+    // Demo mode: without a configured Supabase project (local.properties), show sample Porto data read-only.
+    single<ReportRepository> { if (AppConfig.isConfigured) SupabaseReportRepository(get(), get(), get()) else DemoReportRepository(get()) }
     single<SavedZoneRepository> { SupabaseSavedZoneRepository(get()) }
     single<InviteRepository> { SupabaseInviteRepository(get()) }
     single<GeocodingRepository> { PhotonGeocodingRepository() }
     single<PreferencesRepository> { KStorePreferencesRepository(get(), get(AppScope)) }
 
     // Domain
-    singleOf(::ZoneRiskCalculator)
+    single { ZoneRiskCalculator() } // explicit: singleOf() would try to inject the defaulted RiskThresholds
     singleOf(::LoadZonesUseCase)
+    factoryOf(::LoadZoneDetailUseCase)
+    factoryOf(::ConfirmReportUseCase)
+    factoryOf(::FlagReportUseCase)
 
     // ViewModels (one line per screen; route parameters arrive via parametersOf)
     viewModelOf(::AppViewModel)
     viewModel { (mode: AuthMode, invite: String?) -> AuthViewModel(get(), mode, invite) }
     viewModel { (email: String) -> CheckEmailViewModel(email, get()) }
     viewModelOf(::InviteGateViewModel)
+    viewModel { (focus: MapFocus?) ->
+        MapViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), focus)
+    }
 }
