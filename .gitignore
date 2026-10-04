@@ -1,0 +1,57 @@
+# Gradle / Kotlin
+.gradle/
+build/
+!**/src/**/build/
+.kotlin/
+kotlin-js-store/
+local.properties
+captures/
+*.hprof
+
+# IDEs
+.idea/
+*.iml
+.fleet/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+androidApp/release/
+*.jks
+*.keystore
+keystore.properties
+
+# Xcode / iOS
+iosApp/build/
+xcuserdata/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+*.ipa
+*.dSYM.zip
+*.dSYM
+iosApp/Configuration/Secrets.xcconfig
+
+# Platform secrets: real files are never committed; CI copies the *.ci placeholders
+google-services.json
+GoogleService-Info.plist
+.env
+.env.*
+!*.ci
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# Claude Code local state
+.claude/worktrees/
+.claude/settings.local.json
