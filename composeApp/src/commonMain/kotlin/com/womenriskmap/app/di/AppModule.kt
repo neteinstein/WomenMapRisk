@@ -28,6 +28,8 @@ import com.womenriskmap.feature.auth.ui.screens.AuthMode
 import com.womenriskmap.feature.auth.ui.screens.AuthViewModel
 import com.womenriskmap.feature.auth.ui.screens.CheckEmailViewModel
 import com.womenriskmap.feature.auth.ui.screens.InviteGateViewModel
+import com.womenriskmap.feature.invites.domain.GetInviteOverviewUseCase
+import com.womenriskmap.feature.invites.ui.screens.InvitesViewModel
 import com.womenriskmap.feature.map.domain.ConfirmReportUseCase
 import com.womenriskmap.feature.map.domain.FlagReportUseCase
 import com.womenriskmap.feature.map.domain.LoadZoneDetailUseCase
@@ -35,6 +37,8 @@ import com.womenriskmap.feature.map.ui.screens.MapFocus
 import com.womenriskmap.feature.map.ui.screens.MapViewModel
 import com.womenriskmap.feature.report.domain.SubmitReportUseCase
 import com.womenriskmap.feature.report.ui.screens.ReportViewModel
+import com.womenriskmap.feature.saved.domain.SavedZonesWithRiskUseCase
+import com.womenriskmap.feature.saved.ui.screens.SavedViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -80,6 +84,8 @@ val appModule = module {
     factoryOf(::ConfirmReportUseCase)
     factoryOf(::FlagReportUseCase)
     factoryOf(::SubmitReportUseCase)
+    factoryOf(::SavedZonesWithRiskUseCase)
+    factoryOf(::GetInviteOverviewUseCase)
 
     // ViewModels (one line per screen; route parameters arrive via parametersOf)
     viewModelOf(::AppViewModel)
@@ -90,4 +96,6 @@ val appModule = module {
         MapViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), focus)
     }
     viewModel { (near: GeoPoint?, editingId: String?) -> ReportViewModel(get(), get(), get(), get(), get(), get(), near, editingId) }
+    viewModelOf(::SavedViewModel)
+    viewModel { InvitesViewModel(get(), get(), linkBaseUrl = AppConfig.WEB_APP_URL.ifBlank { "https://womenriskmap.example" }) }
 }

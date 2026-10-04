@@ -35,12 +35,14 @@ import com.womenriskmap.feature.auth.ui.navigation.AuthRoute
 import com.womenriskmap.feature.auth.ui.navigation.CheckEmailRoute
 import com.womenriskmap.feature.auth.ui.navigation.InviteGateRoute
 import com.womenriskmap.feature.auth.ui.navigation.authScreens
+import com.womenriskmap.feature.invites.ui.navigation.invitesScreen
 import com.womenriskmap.feature.map.ui.navigation.MapRoute
 import com.womenriskmap.feature.map.ui.navigation.mapScreen
 import com.womenriskmap.feature.onboarding.ui.navigation.WelcomeRoute
 import com.womenriskmap.feature.onboarding.ui.navigation.welcomeScreen
 import com.womenriskmap.feature.report.ui.navigation.ReportRoute
 import com.womenriskmap.feature.report.ui.navigation.reportScreen
+import com.womenriskmap.feature.saved.ui.navigation.savedScreen
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -137,7 +139,15 @@ fun AppNavHost(
                 onSignUp = { navController.navigate(AuthRoute()) },
                 onLogin = { navController.navigate(AuthRoute(login = true)) },
             )
-            composable<SavedRoute> { Placeholder("Saved") }
+            savedScreen(
+                contentPadding = { contentPadding },
+                onOpenZone = { zone ->
+                    navController.navigate(MapRoute(zone.center.latitude, zone.center.longitude, zone.zoneId)) {
+                        popUpTo(navController.graph.findStartDestination().id)
+                    }
+                },
+            )
+            invitesScreen(onBack = { navController.popBackStack() })
             composable<ProfileRoute> { Placeholder("Profile") }
             reportScreen(onClose = { navController.popBackStack() })
         }

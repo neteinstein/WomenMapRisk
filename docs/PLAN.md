@@ -313,10 +313,14 @@ The first action of implementation is to copy this whole plan into the repo as *
     - Fastest path is 3 taps: Reportar → type → Enviar.
     - New `core:map` module (SafetyMap + PinPickerMap) shared by the map and report features.
     - The visitor prompt on "Reportar" was checked on web.
-- [ ] **Stage 9: feature:saved + feature:invites.**
+- [x] **Stage 9: feature:saved + feature:invites.**
   - Saved list with swipe to delete.
   - Invite progress (locked/unlocked), create/share/revoke, women-only reminder, `touch_usage` on app start.
   - Exit: VM tests green.
+  - ✅ 2026-10-05: 3 SavedViewModel and 7 InvitesViewModel tests are green.
+    - Saved zones show their current colour and support swipe to delete with undo. Tapping a zone opens the map focused on it.
+    - Invites: progress bars, a required women-only confirmation, share text with a `?invite=` link, revoke.
+    - `touch_usage` runs from AppViewModel (Stage 4).
 - [ ] **Stage 10: feature:profile.**
   - Profile, my reports, settings and privacy (location permission rationale, location history toggle), data export, account deletion, logout, PT/EN switch.
   - Exit: VM tests green.
