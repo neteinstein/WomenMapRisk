@@ -2,13 +2,16 @@ package com.womenriskmap.core.map
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.womenriskmap.core.designsystem.theme.LocalRiskColors
@@ -35,6 +38,8 @@ import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.rememberMapState
+import org.maplibre.compose.overlay.ExpandingAttributionButton
+import org.maplibre.compose.overlay.MaplibreLogo
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
@@ -62,6 +67,8 @@ fun SafetyMap(
     onViewportChanged: (BoundingBox, GeoPoint) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    /** Lifts the MapLibre logo + OSM attribution (license requirement) above screen overlays such as FABs. */
+    ornamentsBottomPadding: Dp = 0.dp,
 ) {
     val dark = isSystemInDarkTheme()
     val risk = LocalRiskColors.current
@@ -136,7 +143,17 @@ fun SafetyMap(
             }
     }
 
-    MaplibreMap(modifier = modifier, state = mapState, viewportInsets = contentPadding)
+    MaplibreMap(
+        modifier = modifier,
+        state = mapState,
+        viewportInsets = contentPadding,
+        overlay = {
+            MaplibreLogo(Modifier.align(Alignment.BottomStart).padding(start = 8.dp, bottom = ornamentsBottomPadding))
+            ExpandingAttributionButton(
+                Modifier.align(Alignment.BottomEnd).padding(end = 8.dp, bottom = ornamentsBottomPadding),
+            )
+        },
+    )
 }
 
 /** Zones -> GeoJSON FeatureCollection (points at zone centres, `zone_id` property for clicks). */

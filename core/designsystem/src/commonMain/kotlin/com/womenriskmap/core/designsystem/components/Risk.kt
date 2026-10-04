@@ -3,6 +3,8 @@ package com.womenriskmap.core.designsystem.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -106,7 +108,8 @@ fun RiskBadge(level: RiskLevel, modifier: Modifier = Modifier) {
     }
 }
 
-/** Map legend (spec §4 Ecrã 3). */
+/** Map legend (spec §4 Ecrã 3). Wraps onto two lines on narrow screens instead of truncating. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RiskLegend(modifier: Modifier = Modifier) {
     Surface(
@@ -115,15 +118,15 @@ fun RiskLegend(modifier: Modifier = Modifier) {
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f),
         shadowElevation = 2.dp,
     ) {
-        Row(
+        FlowRow(
             modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s),
             horizontalArrangement = Arrangement.spacedBy(Spacing.m),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             RiskLevel.entries.forEach { level ->
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                     RiskSymbol(level, size = 16.dp)
-                    Text(stringResource(level.style().label), style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(level.style().label), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
                 }
             }
         }

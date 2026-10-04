@@ -13,6 +13,11 @@ class KmpComposeConventionPlugin : Plugin<Project> {
         pluginManager.apply(libs.pluginId("compose-compiler"))
 
         extensions.configure<KotlinMultiplatformExtension> {
+            // AGP 9's KMP library plugin disables Android resources by default; without this, Compose
+            // resources (strings, drawables) are NOT packaged into the APK and the app crashes at runtime.
+            extensions.configure<com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget> {
+                androidResources.enable = true
+            }
             sourceSets.getByName("commonMain").dependencies {
                 libs.findBundle("compose").get().get().forEach { implementation(it) }
                 libs.findBundle("lifecycle").get().get().forEach { implementation(it) }

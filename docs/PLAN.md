@@ -335,9 +335,16 @@ The first action of implementation is to copy this whole plan into the repo as *
   - ✅ 2026-10-05: 4 ModerationViewModel tests are green.
     - SQL side covered by `rules_test.sql` (queue, approve, action log).
     - ⏸ Visual check on web needs a configured Supabase project and a moderator account (seed: `mod@womenriskmap.local`); demo mode has no auth.
-- [ ] **Stage 12: Polish.**
+- [x] **Stage 12: Polish.**
   - Animations, haptics, adaptive/themed icon, launch screens, PrivacyInfo.xcprivacy, locales_config, accessibility pass (contrast, content descriptions, colour-blind symbols).
   - Exit: manual check on Android, iOS and web.
+  - ✅ 2026-10-05: checked on the Android emulator (API 37), the iOS simulator (iPhone 17 Pro, iOS 27) and web.
+    - Fixed a release blocker: Compose resources were not packaged on Android. AGP 9's KMP library needs `androidResources.enable = true`, now set in the compose convention plugin.
+    - The legend wraps on narrow screens.
+    - The OSM attribution is lifted above the FAB (license requirement).
+    - Animations: welcome entrance, sheet and content transitions, confirm heart pulse plus haptic, animated banners and progress.
+    - Accessibility: risk symbols carry content descriptions, checkbox rows use the full row as the touch target, and colour is never the only cue.
+    - ⏸ Known limitation: map zones are not individually exposed to screen readers (MapLibre canvas). The zone sheet and Saved list are accessible.
 - [ ] **Stage 13: CI/CD.**
   - `ci.yml` parallel jobs (android build+R8, unit tests+Kover, lint, iOS, web, supabase-db), optional `deploy-web.yml`, PR template.
   - Exit: workflow YAML validated, and a PR opened so CI runs.

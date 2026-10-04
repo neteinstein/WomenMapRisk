@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -113,6 +114,7 @@ fun MapScreen(
                 onViewportChanged = viewModel::onViewportChanged,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding,
+                ornamentsBottomPadding = 264.dp,
             )
         },
         snackbar = { SnackbarHost(snackbar) },
@@ -224,9 +226,9 @@ fun MapContent(
                     )
                 }
             }
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                 RiskLegend(Modifier.weight(1f, fill = false))
-                Box(Modifier.weight(1f))
+                Spacer(Modifier.weight(0.001f))
                 SmallFloatingActionButton(onClick = onCenterOnMe, containerColor = MaterialTheme.colorScheme.surfaceContainerHigh) {
                     Icon(AppIcons.MyLocation, stringResource(Res.string.map_center_me))
                 }
