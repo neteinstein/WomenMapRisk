@@ -35,6 +35,9 @@ import com.womenriskmap.feature.map.domain.FlagReportUseCase
 import com.womenriskmap.feature.map.domain.LoadZoneDetailUseCase
 import com.womenriskmap.feature.map.ui.screens.MapFocus
 import com.womenriskmap.feature.map.ui.screens.MapViewModel
+import com.womenriskmap.feature.moderation.data.SupabaseModerationRepository
+import com.womenriskmap.feature.moderation.domain.ModerationRepository
+import com.womenriskmap.feature.moderation.ui.screens.ModerationViewModel
 import com.womenriskmap.feature.profile.data.SupabaseAccountRepository
 import com.womenriskmap.feature.profile.domain.AccountRepository
 import com.womenriskmap.feature.profile.ui.screens.ProfileViewModel
@@ -81,6 +84,7 @@ val appModule = module {
     single<GeocodingRepository> { PhotonGeocodingRepository() }
     single<PreferencesRepository> { KStorePreferencesRepository(get(), get(AppScope)) }
     single<AccountRepository> { SupabaseAccountRepository(get(), get()) }
+    single<ModerationRepository> { SupabaseModerationRepository(get()) }
 
     // Domain
     single { ZoneRiskCalculator() } // explicit: singleOf() would try to inject the defaulted RiskThresholds
@@ -104,5 +108,6 @@ val appModule = module {
     viewModelOf(::SavedViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::ModerationViewModel)
     viewModel { InvitesViewModel(get(), get(), linkBaseUrl = AppConfig.WEB_APP_URL.ifBlank { "https://womenriskmap.example" }) }
 }

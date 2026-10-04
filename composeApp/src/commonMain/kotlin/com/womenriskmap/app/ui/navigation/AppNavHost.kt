@@ -34,6 +34,8 @@ import com.womenriskmap.feature.invites.ui.navigation.InvitesRoute
 import com.womenriskmap.feature.invites.ui.navigation.invitesScreen
 import com.womenriskmap.feature.map.ui.navigation.MapRoute
 import com.womenriskmap.feature.map.ui.navigation.mapScreen
+import com.womenriskmap.feature.moderation.ui.navigation.ModerationRoute
+import com.womenriskmap.feature.moderation.ui.navigation.moderationScreen
 import com.womenriskmap.feature.onboarding.ui.navigation.WelcomeRoute
 import com.womenriskmap.feature.onboarding.ui.navigation.welcomeScreen
 import com.womenriskmap.feature.profile.ui.navigation.HelpRoute
@@ -149,6 +151,7 @@ fun AppNavHost(
                 },
             )
             invitesScreen(onBack = { navController.popBackStack() })
+            moderationScreen(onBack = { navController.popBackStack() })
             profileScreens(
                 contentPadding = { contentPadding },
                 actions = ProfileActions(
@@ -156,7 +159,7 @@ fun AppNavHost(
                     onHelp = { navController.navigate(HelpRoute) },
                     onTerms = { navController.navigate(TermsRoute) },
                     onInvite = { navController.navigate(InvitesRoute) },
-                    onModeration = onOpenModeration(navController),
+                    onModeration = { navController.navigate(ModerationRoute) },
                     onEditReport = { id -> navController.navigate(ReportRoute(reportId = id)) },
                     onSignUp = { navController.navigate(AuthRoute()) },
                     onLogin = { navController.navigate(AuthRoute(login = true)) },
@@ -168,6 +171,3 @@ fun AppNavHost(
         }
     }
 }
-
-/** Moderation panel (spec §4 Ecrã 10) is wired in Stage 11. */
-private fun onOpenModeration(navController: NavHostController): () -> Unit = {}

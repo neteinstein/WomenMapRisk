@@ -329,9 +329,12 @@ The first action of implementation is to copy this whole plan into the repo as *
     - The PT/EN switch opens the OS per-app language page (see deviations).
     - `CountryField` moved to designsystem.
     - Gotcha found: running Gradle builds while the `--continuous` web dev server is running corrupts the JS outputs; stop the server first.
-- [ ] **Stage 11: feature:moderation.**
+- [x] **Stage 11: feature:moderation.**
   - Queue (flagged reports and establishment reports), approve/remove/block with reason, counters, inviter chain, revoke invites.
   - Exit: VM tests green, verified on web.
+  - ✅ 2026-10-05: 4 ModerationViewModel tests are green.
+    - SQL side covered by `rules_test.sql` (queue, approve, action log).
+    - ⏸ Visual check on web needs a configured Supabase project and a moderator account (seed: `mod@womenriskmap.local`); demo mode has no auth.
 - [ ] **Stage 12: Polish.**
   - Animations, haptics, adaptive/themed icon, launch screens, PrivacyInfo.xcprivacy, locales_config, accessibility pass (contrast, content descriptions, colour-blind symbols).
   - Exit: manual check on Android, iOS and web.
