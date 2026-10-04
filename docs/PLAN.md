@@ -219,6 +219,16 @@ Optional `deploy-web.yml` on main publishes the wasm build to GitHub Pages (free
 - **Conventional Commits:** documented in AGENTS.md. Implementation work is committed in logical `feat(scope):`/`build:`/`ci:`/`docs:` commits on the current branch.
 - **`.gitignore`:** Gradle, IDE, Kotlin/Native, Xcode (xcuserdata, DerivedData), `local.properties`, the secrets above, `.kotlin/`, `build/`, `.DS_Store`.
 
+## Deviations log (decided during implementation)
+- **2026-10-04: web target is Kotlin/JS (`js { browser() }`), not wasmJs.** maplibre-compose 0.19.0 publishes `js` but no `wasmJs` artifact. Supabase, Koin, KStore and Compose all support `js`. Revisit once maplibre-compose ships wasm.
+- **2026-10-04: ktlint only, no detekt.** detekt 1.23.8 is built against Kotlin 2.0 and breaks with Kotlin 2.4. detekt 2.x is still alpha. Lint = ktlint-gradle + Android lint.
+- **2026-10-04: no BuildKonfig.** A small Gradle task in `core:data` generates `AppConfig.kt` from `local.properties` or env vars. It is simpler and has no plugin compatibility risk with AGP 9's KMP library plugin.
+- **2026-10-04: new `core:testing` module** with shared fakes for feature commonTests.
+- **2026-10-04: feature modules also depend on `core:data`**, because features own their `data/` repository implementations, built on the shared Supabase client.
+- **2026-10-04: JVM test task.** With the AGP 9 KMP library plugin the task is `testAndroidHostTest`. Each shared module also registers a `testDebugUnitTest` alias, so `./gradlew testDebugUnitTest` runs all commonTests.
+- **2026-10-04: all strings live in `core:designsystem`**, with a public `Res` class. This keeps one PT/EN pair of files, so translation completeness is checkable in one place.
+- **2026-10-04: maplibre iOS integration** needs only linker flags (native FFI is bundled), with no SPM package. Android uses the OpenGL runtime, because Vulkan is unreliable on emulators.
+
 ## Progress tracking: `docs/PLAN.md` in the repo
 The first action of implementation is to copy this whole plan into the repo as **`docs/PLAN.md`**. It becomes the living tracker.
 - The stage list below goes into the file as GitHub task-list checkboxes (`- [ ]`).
@@ -235,9 +245,10 @@ The first action of implementation is to copy this whole plan into the repo as *
   - `docs/PLAN.md` (this plan), `docs/spec/especificacao-funcional-v1.md` (spec verbatim), `docs/spec/addendum-invites.md`, `docs/spec/decisions.md`, `.gitignore`.
   - Exit: committed.
   - ✅ 2026-10-04: done (see the `docs(plan): complete stage 0` commit).
-- [ ] **Stage 1: Gradle skeleton.**
-  - Verified version catalog, wrapper, settings, `build-logic` convention plugins, `*.ci` placeholders, BuildKonfig.
+- [x] **Stage 1: Gradle skeleton.**
+  - Verified version catalog, wrapper, settings, `build-logic` convention plugins, `*.ci` placeholders, ~~BuildKonfig~~ (see deviations).
   - Exit: `./gradlew help` green.
+  - ✅ 2026-10-04: Gradle 9.8.0, Kotlin 2.4.20, CMP 1.12.1, AGP 9.4.1. `./gradlew help` and `:core:domain:testDebugUnitTest` are green.
 - [ ] **Stage 2: core:domain + tests.**
   - Models, repo interfaces, ZoneRiskCalculator, LocationAnonymizer, ReportPolicy, DescriptionGuard, InviteEligibility, InviteCode, EmergencyContacts.
   - Exit: domain tests green on JVM.

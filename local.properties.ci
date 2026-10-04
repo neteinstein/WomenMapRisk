@@ -1,0 +1,6 @@
+# Placeholder for CI build validation ONLY. Real values: GitHub secrets / your local.properties (gitignored).
+# Copy to local.properties and fill in. sdk.dir is set by Android Studio or ANDROID_HOME.
+SUPABASE_URL=https://placeholder.supabase.co
+SUPABASE_ANON_KEY=placeholder-anon-key
+GOOGLE_WEB_CLIENT_ID=placeholder.apps.googleusercontent.com
+WEB_APP_URL=https://womenriskmap.example
