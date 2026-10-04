@@ -14,17 +14,12 @@ interface ConnectivityMonitor {
     val isOnline: StateFlow<Boolean>
 }
 
-enum class AppLanguage(val tag: String) { SYSTEM(""), PORTUGUESE("pt"), ENGLISH("en") }
-
 interface PreferencesRepository {
     /** Spec §4 Ecrã 9: off by default. When off, the app never stores the user's location. */
     val locationHistoryEnabled: StateFlow<Boolean>
-    val language: StateFlow<AppLanguage>
     val lastKnownLocation: StateFlow<GeoPoint?>
 
     suspend fun setLocationHistoryEnabled(enabled: Boolean)
-
-    suspend fun setLanguage(language: AppLanguage)
 
     /** Persisted only when location history is enabled; otherwise ignored. */
     suspend fun rememberLocation(point: GeoPoint)

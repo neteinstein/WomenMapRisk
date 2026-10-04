@@ -33,7 +33,7 @@ object InviteEligibility {
     ): Status {
         if (!isEnabled) return Status.NotEnabled
         if (isModerator) return Status.Unlocked(used = activeInvites, remaining = Int.MAX_VALUE, unlimited = true)
-        val days = usageDays.filter { it <= today }.toSortedSet()
+        val days = usageDays.filter { it <= today }.toSet()
         val unlocked = longestStreak(days) >= REQUIRED_STREAK || days.size >= REQUIRED_DISTINCT_DAYS
         if (!unlocked) return Status.Locked(currentStreak = currentStreak(days, today), distinctDays = days.size)
         return Status.Unlocked(used = activeInvites, remaining = (MAX_INVITES - activeInvites).coerceAtLeast(0))

@@ -53,6 +53,10 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
                 implementation(libs.lib("kotlinx-coroutines-test"))
             }
         }
+        extensions.configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+            filter { exclude { it.file.path.contains("${java.io.File.separator}build${java.io.File.separator}") } }
+        }
+
         // Alias so `./gradlew testDebugUnitTest` runs every module's commonTest on the JVM, matching androidApp.
         tasks.register("testDebugUnitTest") {
             group = "verification"
