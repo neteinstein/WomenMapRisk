@@ -42,6 +42,9 @@ firebase-bom = "34.19.0"
 google-services = "4.5.0"
 firebase-crashlytics-plugin = "3.0.8"
 
+# Release: Gradle Play Publisher (4.x supports AGP 9)
+play-publisher = "4.1.1"
+
 # Quality
 kover = "0.9.11"
 ktlint-gradle = "14.2.0"
@@ -147,6 +150,7 @@ google-services = { id = "com.google.gms.google-services", version.ref = "google
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-plugin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }
+play-publisher = { id = "com.github.triplet.play", version.ref = "play-publisher" }
 
 # Convention plugins (build-logic)
 womenriskmap-kmp-library = { id = "womenriskmap.kmp.library" }

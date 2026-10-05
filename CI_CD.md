@@ -18,6 +18,9 @@ Every job first runs `scripts/ci/prepare-placeholders.sh`, which copies the comm
 `androidApp/google-services.json.ci` into place. **These are placeholders for build validation only.** They
 contain no credentials, and the app built from them runs in demo mode.
 
+`.github/workflows/release-android.yml` runs on pushes to `main` and on manual dispatch. It cuts an Android
+release; see [Android release](#android-release) below.
+
 `.github/workflows/deploy-web.yml` runs on pushes to `main`: it builds the web bundle with the Supabase secrets
 and publishes it to **GitHub Pages**.
 
@@ -28,12 +31,15 @@ across shared modules; Compose UI is excluded.
 
 | Name | Kind | Used by | Purpose |
 |---|---|---|---|
-| `SUPABASE_URL` | secret | deploy-web (and future release jobs) | Supabase project URL (`https://<ref>.supabase.co`) |
-| `SUPABASE_ANON_KEY` | secret | deploy-web | Public anon key. RLS + RPC authorisation protect the data, but keep it out of git anyway. |
-| `WEB_APP_URL` | variable | deploy-web | Public web URL, used in invite links (`?invite=CODE`) |
-| `GOOGLE_SERVICES_JSON` | secret (base64) | future Android release job | Real Firebase config (both `…android` and `…android.debug` app ids) |
-| `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | secrets | future Android release job | Writes `keystore.properties` + the keystore. `androidApp/build.gradle.kts` picks them up automatically. |
-| `CRASHLYTICS_UPLOAD_MAPPING=true` | env | future Android release job | Uploads R8 mapping files to Crashlytics |
+| `SUPABASE_URL` | secret | deploy-web, release-android | Supabase project URL (`https://<ref>.supabase.co`) |
+| `SUPABASE_ANON_KEY` | secret | deploy-web, release-android | Public anon key. RLS + RPC authorisation protect the data, but keep it out of git anyway. |
+| `GOOGLE_WEB_CLIENT_ID` | secret | release-android | Google OAuth web client id |
+| `WEB_APP_URL` | variable | deploy-web, release-android | Public web URL, used in invite links (`?invite=CODE`) |
+| `GOOGLE_SERVICES_JSON` | secret (base64) | release-android (optional; placeholder + no Crashlytics without it) | Real Firebase config (both `…android` and `…android.debug` app ids) |
+| `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | secrets | release-android (**required**) | Upload keystore. Passed to Gradle as `KEYSTORE_FILE`/`KEYSTORE_PASSWORD`/`KEY_ALIAS`/`KEY_PASSWORD`; locally `keystore.properties` works too. |
+| `ANDROID_PUBLISHER_CREDENTIALS` | secret | release-android (optional) | Raw JSON of a Play Console service account key. Without it the Play upload is skipped. |
+| `PLAY_TRACK` | variable | release-android (optional) | Play track for the upload; defaults to `internal`. |
+| `CRASHLYTICS_UPLOAD_MAPPING=true` | env | release-android | Set automatically when `GOOGLE_SERVICES_JSON` exists; uploads R8 mapping files to Crashlytics |
 | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF` | secrets | future DB deploy job | `supabase link && supabase db push` |
 
 Build-time config (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GOOGLE_WEB_CLIENT_ID`, `WEB_APP_URL`) is read from env
@@ -43,10 +49,40 @@ vars first, then from `local.properties`, by `:core:data:generateAppConfig`.
 
 | Platform | Status | Next steps |
 |---|---|---|
-| Android | CI builds an **R8-minified release signed with the debug key** (validation only). Release signing is wired but needs the keystore secrets. | Create an upload keystore; add the secrets; add a `release-android.yml` that builds an AAB and uploads it to Play (internal track). |
+| Android | CI builds an **R8-minified release signed with the debug key** (validation only). `release-android.yml` builds the signed APK + AAB, publishes a GitHub Release and, optionally, uploads to Play. | Create an upload keystore and add the secrets; do the first Play upload by hand; then add `ANDROID_PUBLISHER_CREDENTIALS`. |
 | iOS | CI builds **unsigned for the simulator** only. Crashlytics on iOS ⏸. | Set `TEAM_ID` in `iosApp/Configuration/Config.xcconfig` (or via CI); add a signing certificate and provisioning profile (App Store Connect API key); archive + TestFlight. |
 | Web | Deployed to GitHub Pages by `deploy-web.yml`. It runs in demo mode until the Supabase secrets are set. | Enable Pages (Settings → Pages → Source: GitHub Actions); add the secrets. |
 | Database | Migrations are tested in CI. **Not deployed automatically.** | `supabase link --project-ref …` then `supabase db push`, manually or via a protected workflow. Configure auth redirect URLs (`womenriskmap://login-callback`, the web URL) and the Google provider in the dashboard. |
+
+## Android release
+
+`release-android.yml` (push to `main`, or Actions → Release Android → Run workflow), one job:
+
+1. **Validate secrets.** Fails fast without the four `ANDROID_KEY*` secrets. Warns (doesn't fail) when
+   `GOOGLE_SERVICES_JSON` or the Supabase secrets are missing; the release then ships the placeholder Firebase
+   config and/or demo mode.
+2. **ktlint + unit tests** on the exact commit being released (a squash/rebase merge is never built by `ci.yml`).
+3. **Build** `:androidApp:assembleRelease :androidApp:bundleRelease`, signed with the upload key.
+   Version: `versionCode = run_number`, `versionName = 1.0.<run_number>` (`APP_VERSION_CODE`/`APP_VERSION_NAME`).
+4. **Verify obfuscation** (`scripts/ci/verify-obfuscation.sh`): fails if R8 renamed no `com.womenriskmap.*` class.
+5. **GitHub Release** `android-v1.0.<n>` with `WomenRiskMap_version1_0_<n>.apk`, `.aab` and `-mapping.txt`, plus
+   SHA-1s in the notes. Keep the mapping: R8 output differs per build, and stack traces need the exact one
+   (`retrace <mapping.txt> <trace.txt>`).
+6. **Play upload** (`:androidApp:publishReleaseBundle`, Gradle Play Publisher) to `vars.PLAY_TRACK` or `internal`,
+   only when `ANDROID_PUBLISHER_CREDENTIALS` is set. Nothing reaches production without a manual promotion.
+
+**One-time setup**
+- Upload keystore: `keytool -genkeypair -v -keystore upload.keystore -alias upload -keyalg RSA -keysize 4096 -validity 10000`,
+  then `base64 -i upload.keystore | pbcopy` into `ANDROID_KEYSTORE_BASE64`. Back the keystore up outside the repo.
+- Play Console: create the app, enrol in Play App Signing, and **upload the first `.aab` by hand** (from the
+  GitHub Release). The API can't create an app's first release.
+- Google Cloud: enable the Google Play Android Developer API, create a service account + JSON key, invite it in
+  Play Console → Users and permissions with release rights for this app, and store the JSON as
+  `ANDROID_PUBLISHER_CREDENTIALS`.
+
+**Troubleshooting a 403 PERMISSION_DENIED** from the Play upload: the service account isn't invited to this app,
+the first manual release hasn't happened, the Android Publisher API isn't enabled in the key's GCP project, or a
+fresh permission grant is still propagating (can take up to a day). It is rarely the workflow.
 
 ## Operational notes
 

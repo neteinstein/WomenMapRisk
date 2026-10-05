@@ -209,7 +209,7 @@ Optional `deploy-web.yml` on main publishes the wasm build to GitHub Pages (free
   - Note that sandboxed/cloud agents may be unable to reach `dl.google.com`/Maven/Supabase. Offline they can still run `./gradlew help` only if the cache is warm, plus read-only review and SQL review. CI on the PR is the real signal.
 - **`CLAUDE.md`:** `@AGENTS.md`.
 - **`CI_CD.md`:** the jobs, required secrets, and signing status per platform:
-  - Android: debug-signed, release keystore TODO
+  - Android: debug-signed in CI; `release-android.yml` signs, publishes a GitHub Release and optionally uploads to Play
   - iOS: unsigned simulator build, signing TODO
   - Web: Pages
   - Plus the Supabase pause caveat.
@@ -241,6 +241,10 @@ Optional `deploy-web.yml` on main publishes the wasm build to GitHub Pages (free
 - **2026-10-05: Kotlin/JS timezone data.** kotlinx-datetime on JS needs `@js-joda/timezone` (npm, version in the catalog), loaded via `loadTimeZoneDatabase()` expect/actual. `kotlin-js-store/yarn.lock` is committed; run `./gradlew kotlinUpgradeYarnLock` after npm dependency changes.
 - **2026-10-05: map viewport detection** uses `snapshotFlow { isCameraMoving }` instead of `MapEvent.CameraMoveEnded`, which did not fire on web.
 - **2026-10-05: Koin `singleOf(::X)` injects defaulted constructor params too.** Use `single { X() }` for classes with defaults (e.g. `ZoneRiskCalculator`). `verify()` on the JVM does not catch this.
+
+- **2026-10-05: Android release versioning.** `versionCode` = GitHub run number, `versionName` = `1.0.<run>`, set by
+  `release-android.yml` via `APP_VERSION_CODE`/`APP_VERSION_NAME` (replaces the unused `VERSION_CODE` env var).
+  No product flavors: FamilyMoments' separate "github" self-updating flavor has no equivalent here.
 
 - **2026-10-05: new `core:map` module.** It is the only module that touches MapLibre; `feature:map` and `feature:report` both use it, because features must not depend on each other.
 
@@ -351,6 +355,12 @@ The first action of implementation is to copy this whole plan into the repo as *
   - ✅ 2026-10-05: `ci.yml` has 6 parallel jobs (build-android with R8, unit-tests with Kover summary, lint with ktlint + Android lint + strings parity, build-ios, build-web, supabase-db). Also `deploy-web.yml` (GitHub Pages) and the PR template.
     - YAML parses. Every job's command was run locally and is green, except `supabase-db` (no Docker locally; the SQL harness equivalent is green).
     - PR opened on 2026-10-05, at the user's request.
+  - ✅ 2026-10-05: `release-android.yml` (modelled on FamilyMoments' `release.yml`): on push to `main`, validates the
+    signing secrets, runs ktlint + tests, builds a signed APK + AAB (`versionCode` = run number), checks obfuscation
+    (`scripts/ci/verify-obfuscation.sh`), creates a GitHub Release with APK/AAB/mapping, and uploads to Play
+    (internal track) via Gradle Play Publisher 4.1.1 when `ANDROID_PUBLISHER_CREDENTIALS` is set.
+    - Verified locally: release APK + AAB build, `publishReleaseBundle` task exists, env-var signing and versioning
+      (apksigner + aapt2 on a throwaway keystore), obfuscation check (487 classes). The workflow itself only runs on GitHub.
 - [x] **Stage 14: Docs and agent guidance.**
   - `AGENTS.md`, `CLAUDE.md`, `CI_CD.md`, `.claude/skills/*`, README refresh.
   - Exit: final verification below, all boxes ticked or ⏸ with reasons.

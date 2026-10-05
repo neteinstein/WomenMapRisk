@@ -1,0 +1,172 @@
+# Android release: on every push to main (or manual dispatch) builds a signed, R8-minified APK + AAB, creates a
+# GitHub Release with both plus the R8 mapping, and, once a Play service account is configured, uploads the AAB
+# to the Play Console (internal track by default). See CI_CD.md → "Android release".
+name: Release Android
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release-android-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx6g -XX:+UseParallelGC"
+  VERSION_NAME: "1.0.${{ github.run_number }}"
+  APP_VERSION_CODE: ${{ github.run_number }}
+  APP_VERSION_NAME: "1.0.${{ github.run_number }}"
+
+jobs:
+  release:
+    name: Build and publish Android release
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v6
+
+      # Fail fast before spending CI time on lint/test/build if the signing secrets aren't set up.
+      - name: Validate required secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          missing=()
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            [ -z "${!name}" ] && missing+=("$name")
+          done
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::Missing required Action secrets: ${missing[*]}"
+            exit 1
+          fi
+          [ -z "$GOOGLE_SERVICES_JSON" ] && echo "::warning::GOOGLE_SERVICES_JSON not set: release uses the placeholder Firebase config (no Crashlytics)."
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::warning::SUPABASE_URL / SUPABASE_ANON_KEY not set: this release runs in demo mode (read-only sample data)."
+          fi
+          true
+
+      # Real Firebase config when the secret exists; otherwise the committed placeholder.
+      - name: Prepare config
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            echo "$GOOGLE_SERVICES_JSON" | base64 --decode > androidApp/google-services.json
+            echo "CRASHLYTICS_UPLOAD_MAPPING=true" >> "$GITHUB_ENV"
+          fi
+          scripts/ci/prepare-placeholders.sh
+
+      # ci.yml validates the PR, but a squash/rebase merge lands a commit on main that was never itself
+      # built or tested, so this is the only gate covering the exact commit about to be released.
+      - name: Lint and unit tests
+        run: ./gradlew ktlintCheck testDebugUnitTest --stacktrace
+
+      - name: Decode signing keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+
+      - name: Build signed release APK and AAB
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+          WEB_APP_URL: ${{ vars.WEB_APP_URL }}
+        run: ./gradlew :androidApp:assembleRelease :androidApp:bundleRelease --stacktrace
+
+      # A silently un-obfuscated build must not reach users.
+      - name: Verify obfuscation
+        run: scripts/ci/verify-obfuscation.sh
+
+      # Release-facing names + SHA-1s. mapping.txt is copied, not moved: it is an R8 task output, and removing
+      # it would make Gradle re-run minification in the Play publish step, producing a different mapping.
+      - name: Prepare release artifacts
+        id: artifact
+        run: |
+          base="WomenRiskMap_version${VERSION_NAME//./_}"
+          out="$RUNNER_TEMP/release"
+          mkdir -p "$out"
+
+          apk="$out/$base.apk"
+          cp androidApp/build/outputs/apk/release/androidApp-release.apk "$apk"
+          aab="$out/$base.aab"
+          cp androidApp/build/outputs/bundle/release/androidApp-release.aab "$aab"
+          mapping="$out/$base-mapping.txt"
+          cp androidApp/build/outputs/mapping/release/mapping.txt "$mapping"
+
+          {
+            echo "apk_path=$apk"
+            echo "apk_sha1=$(sha1sum "$apk" | awk '{print $1}')"
+            echo "aab_path=$aab"
+            echo "aab_sha1=$(sha1sum "$aab" | awk '{print $1}')"
+            echo "mapping_path=$mapping"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APK_PATH: ${{ steps.artifact.outputs.apk_path }}
+          APK_SHA1: ${{ steps.artifact.outputs.apk_sha1 }}
+          AAB_PATH: ${{ steps.artifact.outputs.aab_path }}
+          AAB_SHA1: ${{ steps.artifact.outputs.aab_sha1 }}
+          MAPPING_PATH: ${{ steps.artifact.outputs.mapping_path }}
+        run: |
+          gh release create "android-v${VERSION_NAME}" \
+            "$APK_PATH" "$AAB_PATH" "$MAPPING_PATH" \
+            --target "$GITHUB_SHA" \
+            --title "Android v${VERSION_NAME}" \
+            --notes "**APK SHA-1:** \`${APK_SHA1}\`
+          **App Bundle (.aab) SHA-1:** \`${AAB_SHA1}\`. Upload this by hand in the Play Console for the app's first release; after that the Play publish step below takes over.
+
+          \`*-mapping.txt\` is R8's rename table for this release. A stack trace only becomes readable when run through it (\`retrace <mapping.txt> <trace.txt>\`); each release has its own." \
+            --generate-notes
+
+      # The `secrets` context isn't available in step-level `if:`, so check presence here and pass it on.
+      - name: Check Play publisher credentials
+        id: play_creds
+        env:
+          ANDROID_PUBLISHER_CREDENTIALS: ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
+        run: echo "has_credentials=${{ env.ANDROID_PUBLISHER_CREDENTIALS != '' }}" >> "$GITHUB_OUTPUT"
+
+      # Optional: only once a Play Console service account key is configured. Uploads the AAB to the
+      # "internal" track (or vars.PLAY_TRACK) via Gradle Play Publisher (androidApp/build.gradle.kts).
+      - name: Publish to Play Store
+        id: publish_play
+        if: steps.play_creds.outputs.has_credentials == 'true'
+        env:
+          ANDROID_PUBLISHER_CREDENTIALS: ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
+          PLAY_TRACK: ${{ vars.PLAY_TRACK }}
+          KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+          WEB_APP_URL: ${{ vars.WEB_APP_URL }}
+        run: ./gradlew :androidApp:publishReleaseBundle --stacktrace
+
+      - name: Play Store publish failure hint
+        if: failure() && steps.publish_play.outcome == 'failure'
+        run: |
+          echo "::error::publishReleaseBundle failed. A 403/PERMISSION_DENIED from androidpublisher.googleapis.com is almost always the service account's Play Console access (not invited to the app, no first manual release yet, Android Publisher API not enabled, or a permission still propagating), not this workflow. See CI_CD.md → Android release."
+
+      - name: Skip Play Store publish
+        if: steps.play_creds.outputs.has_credentials != 'true'
+        run: echo "::notice::ANDROID_PUBLISHER_CREDENTIALS secret not set; skipping Play Store publish. See CI_CD.md."
