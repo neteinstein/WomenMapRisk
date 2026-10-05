@@ -1,0 +1,5 @@
+// Team and bundle settings for iosApp. Set TEAM_ID locally (or via CI) to sign for devices;
+// simulator builds and CI (CODE_SIGNING_ALLOWED=NO) work without it.
+TEAM_ID =
+BUNDLE_ID = com.womenriskmap.ios
+APP_NAME = Women Risk Map

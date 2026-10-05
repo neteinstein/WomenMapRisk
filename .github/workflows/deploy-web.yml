@@ -1,0 +1,49 @@
+# Publishes the web app (Kotlin/JS) to GitHub Pages on every push to main.
+# Requires: repo Settings → Pages → Source = GitHub Actions, and the Supabase secrets below.
+# Without secrets the build still works and ships in demo mode (read-only sample data).
+name: Deploy web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v6
+      - run: scripts/ci/prepare-placeholders.sh
+      - name: Build production bundle
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          WEB_APP_URL: ${{ vars.WEB_APP_URL }}
+        run: ./gradlew :composeApp:jsBrowserDistribution
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: composeApp/build/dist/js/productionExecutable/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
