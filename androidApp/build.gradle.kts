@@ -35,6 +35,20 @@ android {
         versionName = System.getenv("APP_VERSION_NAME")?.takeIf { it.isNotBlank() } ?: "1.0.0"
     }
 
+    // Two distribution channels from one codebase, same applicationId:
+    // - "github": APK published on GitHub Releases. Updates itself from Settings (src/github/AndroidManifest.xml adds
+    //   the install permission, FileProvider and the meta-data flag that turns the Updates section on).
+    // - "playstore": uploaded to Play, which handles updates; no self-update code path is reachable.
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("github") { dimension = "distribution" }
+        create("playstore") { dimension = "distribution" }
+    }
+    // Gradle Play Publisher is off by default (see `play {}` below) and on for "playstore" only.
+    playConfigs {
+        register("playstore") { enabled.set(true) }
+    }
+
     signingConfigs {
         // Release signing only when a keystore is provided (CI secrets / local keystore.properties).
         if (releaseKeystoreFile != null) {
@@ -95,11 +109,13 @@ kotlin {
     jvmToolchain(17)
 }
 
-// Gradle Play Publisher. Authenticates via the ANDROID_PUBLISHER_CREDENTIALS env var (the raw JSON of a
+// Gradle Play Publisher, enabled for the "playstore" flavour only ("github" shares the applicationId and must never
+// be uploaded). Authenticates via the ANDROID_PUBLISHER_CREDENTIALS env var (the raw JSON of a
 // Play Console service account key). Only release-android.yml invokes a publish task. Uploads go to the
 // "internal" track unless PLAY_TRACK overrides it, so nothing reaches production without an explicit
 // promotion in the Play Console.
 play {
+    enabled.set(false)
     track.set(System.getenv("PLAY_TRACK")?.takeIf { it.isNotBlank() } ?: "internal")
     defaultToAppBundles.set(true)
 }

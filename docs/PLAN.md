@@ -244,7 +244,7 @@ Optional `deploy-web.yml` on main publishes the wasm build to GitHub Pages (free
 
 - **2026-10-05: Android release versioning.** `versionCode` = GitHub run number, `versionName` = `1.0.<run>`, set by
   `release-android.yml` via `APP_VERSION_CODE`/`APP_VERSION_NAME` (replaces the unused `VERSION_CODE` env var).
-  No product flavors: FamilyMoments' separate "github" self-updating flavor has no equivalent here.
+  Product flavours `github` (self-updating) and `playstore`, as in FamilyMoments.
 
 - **2026-10-05: new `core:map` module.** It is the only module that touches MapLibre; `feature:map` and `feature:report` both use it, because features must not depend on each other.
 
@@ -361,6 +361,17 @@ The first action of implementation is to copy this whole plan into the repo as *
     (internal track) via Gradle Play Publisher 4.1.1 when `ANDROID_PUBLISHER_CREDENTIALS` is set.
     - Verified locally: release APK + AAB build, `publishReleaseBundle` task exists, env-var signing and versioning
       (apksigner + aapt2 on a throwaway keystore), obfuscation check (487 classes). The workflow itself only runs on GitHub.
+  - ✅ 2026-10-05: **Self-updating `github` flavour** (modelled on FamilyMoments). Flavours `github`/`playstore`
+    (same applicationId). Settings gets an "App updates" section (check → "Update to X" → "install unknown apps"
+    permission if needed → system installer), shown only when `AppUpdater.isSupported`, i.e. in the `github` build.
+    `GitHubAppUpdater` (core:data, Ktor) reads this repo's releases (`android-v*`, `*-github.apk`);
+    `PlatformAppInstaller` (expect/actual) downloads the APK and installs it via FileProvider; a `MY_PACKAGE_REPLACED`
+    receiver deletes the APK. The workflow releases both flavours and uploads only `playstore` to Play.
+    - Verified: 12 new tests (AppVersion, GitHubAppUpdater with MockEngine, SettingsViewModel update flow), all JVM tests,
+      ktlint, lint for both flavours, iOS/JS compile, both release flavours obfuscated (510 classes each), and on the
+      emulator: the github build shows the section and checks the real GitHub API ("latest version" since no
+      release exists yet); the playstore build has no section and no install permission. Not run: an actual install
+      from a published release.
 - [x] **Stage 14: Docs and agent guidance.**
   - `AGENTS.md`, `CLAUDE.md`, `CI_CD.md`, `.claude/skills/*`, README refresh.
   - Exit: final verification below, all boxes ticked or ⏸ with reasons.

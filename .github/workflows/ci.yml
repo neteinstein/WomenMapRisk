@@ -28,14 +28,16 @@ jobs:
         with: { distribution: temurin, java-version: 17 }
       - uses: gradle/actions/setup-gradle@v6
       - run: scripts/ci/prepare-placeholders.sh
-      - name: Assemble debug and minified release (debug-signed when no keystore secret)
+      - name: Assemble debug and minified release, both flavours (debug-signed when no keystore secret)
         run: ./gradlew :androidApp:assembleDebug :androidApp:assembleRelease
+      - name: Verify obfuscation
+        run: scripts/ci/verify-obfuscation.sh
       - uses: actions/upload-artifact@v7
         with:
           name: android-apks
           path: |
             androidApp/build/outputs/apk/**/*.apk
-            androidApp/build/outputs/mapping/release/mapping.txt
+            androidApp/build/outputs/mapping/*/mapping.txt
           retention-days: 7
 
   unit-tests:
@@ -78,7 +80,7 @@ jobs:
       - run: scripts/ci/prepare-placeholders.sh
       - name: Generated strings are in sync with core/designsystem/strings.py
         run: python3 core/designsystem/strings.py && git diff --exit-code -- core/designsystem/src/commonMain/composeResources
-      - run: ./gradlew ktlintCheck :androidApp:lintDebug --continue
+      - run: ./gradlew ktlintCheck :androidApp:lintGithubDebug :androidApp:lintPlaystoreDebug --continue
       - uses: actions/upload-artifact@v7
         if: always()
         with:

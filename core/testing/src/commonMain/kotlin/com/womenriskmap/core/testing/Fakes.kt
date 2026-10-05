@@ -2,6 +2,7 @@ package com.womenriskmap.core.testing
 
 import com.womenriskmap.core.domain.error.DomainException
 import com.womenriskmap.core.domain.model.AccountStatus
+import com.womenriskmap.core.domain.model.AppUpdate
 import com.womenriskmap.core.domain.model.BoundingBox
 import com.womenriskmap.core.domain.model.DayPeriod
 import com.womenriskmap.core.domain.model.FlagReason
@@ -16,8 +17,10 @@ import com.womenriskmap.core.domain.model.ReportStatus
 import com.womenriskmap.core.domain.model.ReportType
 import com.womenriskmap.core.domain.model.SavedZone
 import com.womenriskmap.core.domain.model.SessionState
+import com.womenriskmap.core.domain.model.UpdateCheckResult
 import com.womenriskmap.core.domain.model.UserProfile
 import com.womenriskmap.core.domain.model.UserRole
+import com.womenriskmap.core.domain.repository.AppUpdater
 import com.womenriskmap.core.domain.repository.AreaSnapshot
 import com.womenriskmap.core.domain.repository.ConnectivityMonitor
 import com.womenriskmap.core.domain.repository.GeocodingRepository
@@ -254,4 +257,21 @@ class FakePreferencesRepository : PreferencesRepository {
     override suspend fun rememberLocation(point: GeoPoint) {
         if (locationHistoryEnabled.value) lastKnownLocation.value = LocationAnonymizer.snap(point)
     }
+}
+
+class FakeAppUpdater(
+    override val isSupported: Boolean = false,
+    var result: Result<UpdateCheckResult> = Result.success(UpdateCheckResult.UpToDate("1.0.0")),
+    var canInstall: Boolean = true,
+    var installResult: Result<Unit> = Result.success(Unit),
+) : AppUpdater {
+    val calls = mutableListOf<String>()
+    override suspend fun checkForUpdate(): Result<UpdateCheckResult> = result.also { calls += "check" }
+    override fun canInstallPackages(): Boolean = canInstall
+    override fun openInstallPermissionSettings() {
+        calls += "openPermission"
+    }
+    override suspend fun downloadAndInstall(
+        update: AppUpdate,
+    ): Result<Unit> = installResult.also { calls += "install:${update.versionName}" }
 }

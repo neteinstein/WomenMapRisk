@@ -231,6 +231,15 @@
     <string name="settings_delete_confirm">Apagar definitivamente</string>
     <string name="settings_deleted">A tua conta foi apagada.</string>
     <string name="settings_theme_note">O tema claro e escuro segue o dispositivo.</string>
+    <string name="settings_updates">Atualizações da app</string>
+    <string name="settings_updates_check">Procurar atualizações</string>
+    <string name="settings_updates_body">Esta versão foi instalada a partir do GitHub, por isso atualiza-se aqui.</string>
+    <string name="settings_updates_checking">A procurar…</string>
+    <string name="settings_updates_up_to_date">Tens a versão mais recente (%1$s).</string>
+    <string name="settings_updates_available">A versão %1$s está disponível.</string>
+    <string name="settings_updates_install">Atualizar para %1$s</string>
+    <string name="settings_updates_installing">A transferir…</string>
+    <string name="settings_updates_permission">Permite que esta app instale atualizações nas definições do sistema e depois toca em Atualizar outra vez.</string>
     <string name="help_title">Ajuda</string>
     <string name="help_body">• Os reportes são anónimos: as outras mulheres nunca veem quem reportou.\n• A localização é arredondada para uma zona aproximada (~50 m).\n• Cores: verde = sem reportes, amarelo = alguns, vermelho = muitos. Cada cor tem também um símbolo.\n• Podes fazer até 5 reportes por dia e editar ou apagar cada um durante 24 horas.\n• Toca em “Também senti isto” para confirmar um reporte, ou em “Denunciar reporte” se não cumprir as regras.\n• Em caso de emergência, liga sempre 112.</string>
     <string name="terms_title">Termos e privacidade</string>

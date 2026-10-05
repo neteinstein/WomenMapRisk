@@ -108,9 +108,9 @@ connectivity, file storage, share sheet, permission prompts, opening system sett
 ```bash
 ./gradlew testDebugUnitTest                 # all shared tests (JVM)
 ./gradlew ktlintCheck                       # style (ktlintFormat to fix)
-./gradlew :androidApp:assembleDebug         # Android debug APK
-./gradlew :androidApp:assembleRelease       # R8-minified release (debug-signed without a keystore)
-./gradlew :androidApp:lintDebug
+./gradlew :androidApp:assembleGithubDebug   # Android debug APK (flavours: github = self-updating, playstore)
+./gradlew :androidApp:assembleRelease       # R8-minified release, both flavours (debug-signed without a keystore)
+./gradlew :androidApp:lintGithubDebug :androidApp:lintPlaystoreDebug
 ./gradlew :composeApp:jsBrowserDistribution # web bundle → composeApp/build/dist/js/productionExecutable
 ./gradlew :composeApp:jsBrowserDevelopmentRun --continuous   # web dev server on :8080 (.claude/launch.json "web")
 ./gradlew koverHtmlReport                   # coverage → build/reports/kover/html
@@ -175,6 +175,12 @@ Supabase endpoints may be blocked, and there is no emulator, Xcode or Docker. Wh
 13. **Language** comes from the OS per-app language setting (Android 13+ `generateLocaleConfig`, iOS
     `CFBundleLocalizations`, browser on web). There is no in-app language switch.
 14. **Time-based ViewModel loops** (polling) take an injectable interval. Pass `null` in tests, or `runTest` never goes idle.
+15. **Android flavours (`distribution`):** `github` (APK on GitHub Releases, self-updates from Settings → App updates)
+    and `playstore` (Play handles updates). Both share the applicationId. Everything self-update-specific in the
+    APK comes from `androidApp/src/github/AndroidManifest.xml`; `PlatformAppInstaller` reads its
+    `com.womenriskmap.self_update` meta-data, so the shared code and the single `AppModule` need no flavour checks.
+    `GitHubAppUpdater` expects release tags `android-v<version>` and an asset ending `-github.apk`, as produced by
+    `release-android.yml`. Change both together. Only `playstore` is ever uploaded to Play.
 
 ## Skills (`.claude/skills/`)
 

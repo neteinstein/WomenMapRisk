@@ -7,9 +7,9 @@
 
 | Job | Runner | What it proves | Command(s) |
 |---|---|---|---|
-| `build-android` | ubuntu | Debug build + **R8-minified release** compiles and shrinks | `:androidApp:assembleDebug :androidApp:assembleRelease` (uploads APKs + `mapping.txt`) |
+| `build-android` | ubuntu | Debug build + **R8-minified release** of both flavours compiles, shrinks and is obfuscated | `:androidApp:assembleDebug :androidApp:assembleRelease`, `scripts/ci/verify-obfuscation.sh` (uploads APKs + mappings) |
 | `unit-tests` | ubuntu | All `commonTest` suites on the JVM, plus coverage | `testDebugUnitTest koverXmlReport koverHtmlReport`. A coverage table goes to the job summary; reports are uploaded as artifacts. |
-| `lint` | ubuntu | Style, Android lint, generated strings in sync | `strings.py && git diff --exit-code`, `ktlintCheck :androidApp:lintDebug` |
+| `lint` | ubuntu | Style, Android lint, generated strings in sync | `strings.py && git diff --exit-code`, `ktlintCheck :androidApp:lintGithubDebug :androidApp:lintPlaystoreDebug` |
 | `build-ios` | macos | Hand-authored Xcode project + Kotlin framework embed | `xcodebuild … -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build` |
 | `build-web` | ubuntu | Kotlin/JS production bundle | `:composeApp:jsBrowserDistribution` (uploads `web-dist`) |
 | `supabase-db` | ubuntu | Migrations, seed and pgTAP on the **real** Supabase stack | `supabase db start && supabase db reset && supabase test db` |
@@ -62,13 +62,16 @@ vars first, then from `local.properties`, by `:core:data:generateAppConfig`.
    `GOOGLE_SERVICES_JSON` or the Supabase secrets are missing; the release then ships the placeholder Firebase
    config and/or demo mode.
 2. **ktlint + unit tests** on the exact commit being released (a squash/rebase merge is never built by `ci.yml`).
-3. **Build** `:androidApp:assembleRelease :androidApp:bundleRelease`, signed with the upload key.
+3. **Build** `:androidApp:assembleRelease :androidApp:bundlePlaystoreRelease`, signed with the upload key. Two flavours:
+   `github` (self-updating APK, Settings → App updates) and `playstore` (APK + AAB for Play, no self-update).
    Version: `versionCode = run_number`, `versionName = 1.0.<run_number>` (`APP_VERSION_CODE`/`APP_VERSION_NAME`).
-4. **Verify obfuscation** (`scripts/ci/verify-obfuscation.sh`): fails if R8 renamed no `com.womenriskmap.*` class.
-5. **GitHub Release** `android-v1.0.<n>` with `WomenRiskMap_version1_0_<n>.apk`, `.aab` and `-mapping.txt`, plus
-   SHA-1s in the notes. Keep the mapping: R8 output differs per build, and stack traces need the exact one
+4. **Verify obfuscation** (`scripts/ci/verify-obfuscation.sh`): fails if R8 renamed no `com.womenriskmap.*` class
+   in either flavour.
+5. **GitHub Release** `android-v1.0.<n>` with `WomenRiskMap_version1_0_<n>-github.apk`, `-playstore.apk`,
+   `-playstore.aab` and one `-mapping.txt` per flavour, plus SHA-1s in the notes. The installed `github` app finds
+   updates by the `android-v` tag and the `-github.apk` suffix (`GitHubAppUpdater`); keep them in sync. Keep the mapping: R8 output differs per build, and stack traces need the exact one
    (`retrace <mapping.txt> <trace.txt>`).
-6. **Play upload** (`:androidApp:publishReleaseBundle`, Gradle Play Publisher) to `vars.PLAY_TRACK` or `internal`,
+6. **Play upload** (`:androidApp:publishPlaystoreReleaseBundle`, Gradle Play Publisher; never the `github` flavour) to `vars.PLAY_TRACK` or `internal`,
    only when `ANDROID_PUBLISHER_CREDENTIALS` is set. Nothing reaches production without a manual promotion.
 
 **One-time setup**

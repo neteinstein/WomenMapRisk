@@ -231,6 +231,15 @@
     <string name="settings_delete_confirm">Delete permanently</string>
     <string name="settings_deleted">Your account was deleted.</string>
     <string name="settings_theme_note">Light and dark themes follow your device.</string>
+    <string name="settings_updates">App updates</string>
+    <string name="settings_updates_check">Check for updates</string>
+    <string name="settings_updates_body">This version is installed from GitHub, so it updates itself here.</string>
+    <string name="settings_updates_checking">Checking…</string>
+    <string name="settings_updates_up_to_date">You have the latest version (%1$s).</string>
+    <string name="settings_updates_available">Version %1$s is available.</string>
+    <string name="settings_updates_install">Update to %1$s</string>
+    <string name="settings_updates_installing">Downloading…</string>
+    <string name="settings_updates_permission">Allow this app to install updates in the system settings, then tap Update again.</string>
     <string name="help_title">Help</string>
     <string name="help_body">• Reports are anonymous: other women never see who reported.\n• Locations are rounded to an approximate area (~50 m).\n• Colours: green = no reports, yellow = some, red = many. Each colour also has a symbol.\n• You can make up to 5 reports per day and edit or delete each one for 24 hours.\n• Tap “I felt this too” to confirm a report, or “Report as inappropriate” if it breaks the rules.\n• In an emergency, always call 112.</string>
     <string name="terms_title">Terms and privacy</string>

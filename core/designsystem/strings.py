@@ -236,6 +236,16 @@ S = [
 ("settings_delete_confirm", "Delete permanently", "Apagar definitivamente"),
 ("settings_deleted", "Your account was deleted.", "A tua conta foi apagada."),
 ("settings_theme_note", "Light and dark themes follow your device.", "O tema claro e escuro segue o dispositivo."),
+# Self-update (Android "github" build only; not in the spec)
+("settings_updates", "App updates", "Atualizações da app"),
+("settings_updates_check", "Check for updates", "Procurar atualizações"),
+("settings_updates_body", "This version is installed from GitHub, so it updates itself here.", "Esta versão foi instalada a partir do GitHub, por isso atualiza-se aqui."),
+("settings_updates_checking", "Checking…", "A procurar…"),
+("settings_updates_up_to_date", "You have the latest version (%1$s).", "Tens a versão mais recente (%1$s)."),
+("settings_updates_available", "Version %1$s is available.", "A versão %1$s está disponível."),
+("settings_updates_install", "Update to %1$s", "Atualizar para %1$s"),
+("settings_updates_installing", "Downloading…", "A transferir…"),
+("settings_updates_permission", "Allow this app to install updates in the system settings, then tap Update again.", "Permite que esta app instale atualizações nas definições do sistema e depois toca em Atualizar outra vez."),
 # Help & terms
 ("help_title", "Help", "Ajuda"),
 ("help_body", "• Reports are anonymous: other women never see who reported.\n• Locations are rounded to an approximate area (~50 m).\n• Colours: green = no reports, yellow = some, red = many. Each colour also has a symbol.\n• You can make up to 5 reports per day and edit or delete each one for 24 hours.\n• Tap “I felt this too” to confirm a report, or “Report as inappropriate” if it breaks the rules.\n• In an emergency, always call 112.", "• Os reportes são anónimos: as outras mulheres nunca veem quem reportou.\n• A localização é arredondada para uma zona aproximada (~50 m).\n• Cores: verde = sem reportes, amarelo = alguns, vermelho = muitos. Cada cor tem também um símbolo.\n• Podes fazer até 5 reportes por dia e editar ou apagar cada um durante 24 horas.\n• Toca em “Também senti isto” para confirmar um reporte, ou em “Denunciar reporte” se não cumprir as regras.\n• Em caso de emergência, liga sempre 112."),

@@ -2,6 +2,7 @@ package com.womenriskmap.feature.profile
 
 import com.womenriskmap.core.domain.error.DomainException
 import com.womenriskmap.core.domain.model.SessionState
+import com.womenriskmap.core.testing.FakeAppUpdater
 import com.womenriskmap.core.testing.FakeLocationProvider
 import com.womenriskmap.core.testing.FakePreferencesRepository
 import com.womenriskmap.core.testing.FakeReportRepository
@@ -70,7 +71,14 @@ class ProfileViewModelTest {
     @Test
     fun settings_history_off_by_default_and_toggle() = runViewModelTest {
         val prefs = FakePreferencesRepository()
-        val vm = SettingsViewModel(FakeLocationProvider(), prefs, FakeSessionRepository(SessionState.SignedIn(testUser())), FakeAccount())
+        val vm =
+            SettingsViewModel(
+                FakeLocationProvider(),
+                prefs,
+                FakeSessionRepository(SessionState.SignedIn(testUser())),
+                FakeAccount(),
+                FakeAppUpdater(),
+            )
         assertFalse(vm.state.value.historyEnabled)
         assertFalse(vm.state.value.locationGranted)
         vm.onHistoryChange(true)
@@ -79,11 +87,18 @@ class ProfileViewModelTest {
 
     @Test
     fun export_shares_json_and_errors_are_reported() = runViewModelTest {
-        val vm = SettingsViewModel(FakeLocationProvider(), FakePreferencesRepository(), FakeSessionRepository(), FakeAccount())
+        val vm =
+            SettingsViewModel(FakeLocationProvider(), FakePreferencesRepository(), FakeSessionRepository(), FakeAccount(), FakeAppUpdater())
         vm.export()
         assertIs<SettingsEffect.ShareExport>(vm.effects.first())
         val failing =
-            SettingsViewModel(FakeLocationProvider(), FakePreferencesRepository(), FakeSessionRepository(), FakeAccount(fail = true))
+            SettingsViewModel(
+                FakeLocationProvider(),
+                FakePreferencesRepository(),
+                FakeSessionRepository(),
+                FakeAccount(fail = true),
+                FakeAppUpdater(),
+            )
         failing.export()
         assertIs<SettingsEffect.Error>(failing.effects.first())
     }
@@ -92,7 +107,14 @@ class ProfileViewModelTest {
     fun delete_account_requires_confirmation_and_wipes_local_history() = runViewModelTest {
         val account = FakeAccount()
         val prefs = FakePreferencesRepository().apply { setLocationHistoryEnabled(true) }
-        val vm = SettingsViewModel(FakeLocationProvider(), prefs, FakeSessionRepository(SessionState.SignedIn(testUser())), account)
+        val vm =
+            SettingsViewModel(
+                FakeLocationProvider(),
+                prefs,
+                FakeSessionRepository(SessionState.SignedIn(testUser())),
+                account,
+                FakeAppUpdater(),
+            )
         vm.onDeleteTapped()
         assertTrue(vm.state.value.confirmingDelete)
         vm.confirmDelete()

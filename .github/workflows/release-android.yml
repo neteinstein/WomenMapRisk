@@ -1,6 +1,8 @@
-# Android release: on every push to main (or manual dispatch) builds a signed, R8-minified APK + AAB, creates a
-# GitHub Release with both plus the R8 mapping, and, once a Play service account is configured, uploads the AAB
-# to the Play Console (internal track by default). See CI_CD.md → "Android release".
+# Android release: on every push to main (or manual dispatch) builds both distribution flavours, signed and
+# R8-minified, creates a GitHub Release with them, and, once a Play service account is configured, uploads the
+# "playstore" AAB to the Play Console (internal track by default). See CI_CD.md → "Android release".
+#   github    → self-updating APK (Settings → App updates reads this repo's releases: tag android-v*, *-github.apk)
+#   playstore → APK + AAB for Play; no self-update
 name: Release Android
 
 on:
@@ -78,7 +80,8 @@ jobs:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
 
-      - name: Build signed release APK and AAB
+      # assembleRelease = assembleGithubRelease + assemblePlaystoreRelease.
+      - name: Build signed release APKs and AAB
         env:
           KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -88,7 +91,7 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
           WEB_APP_URL: ${{ vars.WEB_APP_URL }}
-        run: ./gradlew :androidApp:assembleRelease :androidApp:bundleRelease --stacktrace
+        run: ./gradlew :androidApp:assembleRelease :androidApp:bundlePlaystoreRelease --stacktrace
 
       # A silently un-obfuscated build must not reach users.
       - name: Verify obfuscation
@@ -103,38 +106,36 @@ jobs:
           out="$RUNNER_TEMP/release"
           mkdir -p "$out"
 
-          apk="$out/$base.apk"
-          cp androidApp/build/outputs/apk/release/androidApp-release.apk "$apk"
-          aab="$out/$base.aab"
-          cp androidApp/build/outputs/bundle/release/androidApp-release.aab "$aab"
-          mapping="$out/$base-mapping.txt"
-          cp androidApp/build/outputs/mapping/release/mapping.txt "$mapping"
-
+          # The "-github.apk" suffix and "android-v" tag are what GitHubAppUpdater looks for. Keep them in sync.
+          for flavor in github playstore; do
+            apk="$out/$base-$flavor.apk"
+            cp "androidApp/build/outputs/apk/$flavor/release/androidApp-$flavor-release.apk" "$apk"
+            cp "androidApp/build/outputs/mapping/${flavor}Release/mapping.txt" "$out/$base-$flavor-mapping.txt"
+            echo "${flavor}_sha1=$(sha1sum "$apk" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+          done
+          aab="$out/$base-playstore.aab"
+          cp androidApp/build/outputs/bundle/playstoreRelease/androidApp-playstore-release.aab "$aab"
           {
-            echo "apk_path=$apk"
-            echo "apk_sha1=$(sha1sum "$apk" | awk '{print $1}')"
-            echo "aab_path=$aab"
             echo "aab_sha1=$(sha1sum "$aab" | awk '{print $1}')"
-            echo "mapping_path=$mapping"
+            echo "dir=$out"
           } >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APK_PATH: ${{ steps.artifact.outputs.apk_path }}
-          APK_SHA1: ${{ steps.artifact.outputs.apk_sha1 }}
-          AAB_PATH: ${{ steps.artifact.outputs.aab_path }}
+          DIR: ${{ steps.artifact.outputs.dir }}
+          GITHUB_SHA1: ${{ steps.artifact.outputs.github_sha1 }}
+          PLAYSTORE_SHA1: ${{ steps.artifact.outputs.playstore_sha1 }}
           AAB_SHA1: ${{ steps.artifact.outputs.aab_sha1 }}
-          MAPPING_PATH: ${{ steps.artifact.outputs.mapping_path }}
         run: |
-          gh release create "android-v${VERSION_NAME}" \
-            "$APK_PATH" "$AAB_PATH" "$MAPPING_PATH" \
+          gh release create "android-v${VERSION_NAME}" "$DIR"/* \
             --target "$GITHUB_SHA" \
             --title "Android v${VERSION_NAME}" \
-            --notes "**APK SHA-1:** \`${APK_SHA1}\`
-          **App Bundle (.aab) SHA-1:** \`${AAB_SHA1}\`. Upload this by hand in the Play Console for the app's first release; after that the Play publish step below takes over.
+            --notes "**github flavour (self-updating) APK SHA-1:** \`${GITHUB_SHA1}\`. Install this one for direct downloads.
+          **playstore flavour APK SHA-1:** \`${PLAYSTORE_SHA1}\` (no self-update)
+          **playstore App Bundle (.aab) SHA-1:** \`${AAB_SHA1}\`. Upload this by hand in the Play Console for the app's first release; after that the workflow uploads it.
 
-          \`*-mapping.txt\` is R8's rename table for this release. A stack trace only becomes readable when run through it (\`retrace <mapping.txt> <trace.txt>\`); each release has its own." \
+          The \`*-mapping.txt\` files are R8's rename tables for each flavour of this release. A stack trace only becomes readable when run through it (\`retrace <mapping.txt> <trace.txt>\`); each release has its own." \
             --generate-notes
 
       # The `secrets` context isn't available in step-level `if:`, so check presence here and pass it on.
@@ -144,8 +145,9 @@ jobs:
           ANDROID_PUBLISHER_CREDENTIALS: ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
         run: echo "has_credentials=${{ env.ANDROID_PUBLISHER_CREDENTIALS != '' }}" >> "$GITHUB_OUTPUT"
 
-      # Optional: only once a Play Console service account key is configured. Uploads the AAB to the
-      # "internal" track (or vars.PLAY_TRACK) via Gradle Play Publisher (androidApp/build.gradle.kts).
+      # Optional: only once a Play Console service account key is configured. Uploads the playstore AAB to the
+      # "internal" track (or vars.PLAY_TRACK) via Gradle Play Publisher (androidApp/build.gradle.kts). Never the
+      # github flavour: it shares the applicationId.
       - name: Publish to Play Store
         id: publish_play
         if: steps.play_creds.outputs.has_credentials == 'true'
@@ -160,12 +162,12 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
           WEB_APP_URL: ${{ vars.WEB_APP_URL }}
-        run: ./gradlew :androidApp:publishReleaseBundle --stacktrace
+        run: ./gradlew :androidApp:publishPlaystoreReleaseBundle --stacktrace
 
       - name: Play Store publish failure hint
         if: failure() && steps.publish_play.outcome == 'failure'
         run: |
-          echo "::error::publishReleaseBundle failed. A 403/PERMISSION_DENIED from androidpublisher.googleapis.com is almost always the service account's Play Console access (not invited to the app, no first manual release yet, Android Publisher API not enabled, or a permission still propagating), not this workflow. See CI_CD.md → Android release."
+          echo "::error::publishPlaystoreReleaseBundle failed. A 403/PERMISSION_DENIED from androidpublisher.googleapis.com is almost always the service account's Play Console access (not invited to the app, no first manual release yet, Android Publisher API not enabled, or a permission still propagating), not this workflow. See CI_CD.md → Android release."
 
       - name: Skip Play Store publish
         if: steps.play_creds.outputs.has_credentials != 'true'
