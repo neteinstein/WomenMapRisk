@@ -350,10 +350,12 @@ The first action of implementation is to copy this whole plan into the repo as *
   - Exit: workflow YAML validated, and a PR opened so CI runs.
   - ✅ 2026-10-05: `ci.yml` has 6 parallel jobs (build-android with R8, unit-tests with Kover summary, lint with ktlint + Android lint + strings parity, build-ios, build-web, supabase-db). Also `deploy-web.yml` (GitHub Pages) and the PR template.
     - YAML parses. Every job's command was run locally and is green, except `supabase-db` (no Docker locally; the SQL harness equivalent is green).
-    - ⏸ Opening a PR is pending user approval (pushing to the remote is outward-facing).
-- [ ] **Stage 14: Docs and agent guidance.**
+    - PR opened on 2026-10-05, at the user's request.
+- [x] **Stage 14: Docs and agent guidance.**
   - `AGENTS.md`, `CLAUDE.md`, `CI_CD.md`, `.claude/skills/*`, README refresh.
   - Exit: final verification below, all boxes ticked or ⏸ with reasons.
+  - ✅ 2026-10-05: AGENTS.md (stack, layout, conventions, sandbox notes, 14 gotchas), CLAUDE.md → @AGENTS.md, CI_CD.md, README, and 3 skills (spec-copy-sync, add-feature-module, supabase-migration).
+    - Final run green: 117 JVM tests, ktlint, Android lint, R8 release (470 app classes obfuscated), web bundle, iOS simulator build, SQL harness 37/37.
 
 ## Verification
 - `./gradlew allTests koverHtmlReport` (JVM tests green, including commonTest).
