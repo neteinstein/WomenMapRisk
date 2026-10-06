@@ -61,6 +61,9 @@ import com.womenriskmap.feature.auth.ui.components.CheckRow
 import com.womenriskmap.feature.auth.ui.components.PasswordField
 import org.jetbrains.compose.resources.stringResource
 
+/** Google sign-in is hidden for now. The repository/ViewModel plumbing stays; flip this to bring the button back. */
+internal const val GOOGLE_SIGN_IN_ENABLED = false
+
 /** Spec §4 Ecrã 2: registo e login. Stateful entry: wires the ViewModel to [AuthContent]. */
 @Composable
 fun AuthScreen(viewModel: AuthViewModel, onBack: () -> Unit, onConfirmEmail: (String) -> Unit, onSignedIn: () -> Unit) {
@@ -216,16 +219,18 @@ fun AuthContent(
                     loading = state.submitting,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    HorizontalDivider(Modifier.weight(1f))
-                    Text(
-                        stringResource(Res.string.auth_or),
-                        modifier = Modifier.padding(horizontal = Spacing.m),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                    HorizontalDivider(Modifier.weight(1f))
+                if (GOOGLE_SIGN_IN_ENABLED) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        HorizontalDivider(Modifier.weight(1f))
+                        Text(
+                            stringResource(Res.string.auth_or),
+                            modifier = Modifier.padding(horizontal = Spacing.m),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        HorizontalDivider(Modifier.weight(1f))
+                    }
+                    SecondaryButton(stringResource(Res.string.auth_google), onGoogle, Modifier.fillMaxWidth(), enabled = !state.submitting)
                 }
-                SecondaryButton(stringResource(Res.string.auth_google), onGoogle, Modifier.fillMaxWidth(), enabled = !state.submitting)
                 TextButton(
                     onClick = { onModeChange(if (signUp) AuthMode.LOGIN else AuthMode.SIGN_UP) },
                     modifier = Modifier.align(Alignment.CenterHorizontally),
