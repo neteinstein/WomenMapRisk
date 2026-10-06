@@ -140,6 +140,11 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit, onAccountDe
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = Spacing.l),
                 )
+                if (state.updatesSupported) {
+                    HorizontalDivider(Modifier.padding(vertical = Spacing.m))
+                    SectionTitle(stringResource(Res.string.settings_updates), Modifier.padding(horizontal = Spacing.l))
+                    UpdatesSection(state.update, onCheck = viewModel::checkForUpdates, onInstall = viewModel::installUpdate)
+                }
                 if (state.signedIn) {
                     HorizontalDivider(Modifier.padding(vertical = Spacing.m))
                     SectionTitle(stringResource(Res.string.settings_title), Modifier.padding(horizontal = Spacing.l))
@@ -182,5 +187,42 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit, onAccountDe
             },
             dismissButton = { TextButton(onClick = viewModel::onDismissDelete) { Text(stringResource(Res.string.cancel)) } },
         )
+    }
+}
+
+/** Self-update (Android "github" build only): check GitHub Releases, then download and hand off to the installer. */
+@Composable
+private fun UpdatesSection(status: UpdateStatus, onCheck: () -> Unit, onInstall: () -> Unit) {
+    val busy = status is UpdateStatus.Checking || status is UpdateStatus.Installing
+    MenuRow(
+        icon = AppIcons.Update,
+        title = stringResource(Res.string.settings_updates_check),
+        subtitle = when (status) {
+            UpdateStatus.Idle -> stringResource(Res.string.settings_updates_body)
+            UpdateStatus.Checking -> stringResource(Res.string.settings_updates_checking)
+            is UpdateStatus.UpToDate -> stringResource(Res.string.settings_updates_up_to_date, status.versionName)
+            is UpdateStatus.Available -> stringResource(Res.string.settings_updates_available, status.update.versionName)
+            is UpdateStatus.Installing -> stringResource(Res.string.settings_updates_installing)
+        },
+        onClick = { if (!busy) onCheck() },
+        trailing = if (busy) {
+            { CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp) }
+        } else {
+            null
+        },
+    )
+    if (status is UpdateStatus.Available) {
+        Column(Modifier.padding(horizontal = Spacing.l), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            if (status.needsPermission) {
+                Text(
+                    stringResource(Res.string.settings_updates_permission),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            FilledTonalButton(onClick = onInstall) {
+                Text(stringResource(Res.string.settings_updates_install, status.update.versionName))
+            }
+        }
     }
 }

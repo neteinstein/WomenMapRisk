@@ -13,7 +13,10 @@ import com.womenriskmap.core.data.repository.SupabaseInviteRepository
 import com.womenriskmap.core.data.repository.SupabaseReportRepository
 import com.womenriskmap.core.data.repository.SupabaseSavedZoneRepository
 import com.womenriskmap.core.data.repository.SupabaseSessionRepository
+import com.womenriskmap.core.data.update.GitHubAppUpdater
+import com.womenriskmap.core.data.update.PlatformAppInstaller
 import com.womenriskmap.core.domain.model.GeoPoint
+import com.womenriskmap.core.domain.repository.AppUpdater
 import com.womenriskmap.core.domain.repository.ConnectivityMonitor
 import com.womenriskmap.core.domain.repository.GeocodingRepository
 import com.womenriskmap.core.domain.repository.InviteRepository
@@ -74,6 +77,8 @@ val appModule = module {
     // Platform services
     single<LocationProvider> { PlatformLocationProvider(get()) }
     single<ConnectivityMonitor> { PlatformConnectivityMonitor(get()) }
+    // Self-update from GitHub Releases: active only in the Android "github" flavour (isSupported is false elsewhere).
+    single<AppUpdater> { GitHubAppUpdater(PlatformAppInstaller(get())) }
 
     // Repositories (core contracts -> data implementations)
     single<SessionRepository> { SupabaseSessionRepository(get(), get(), get(AppScope)) }

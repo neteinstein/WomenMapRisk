@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Merged only into the "github" flavour: the APK distributed through GitHub Releases, which updates itself from
+     Settings (core:data GitHubAppUpdater / PlatformAppInstaller). The "playstore" flavour has none of this: Play
+     distributes updates and forbids installing packages outside it. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Lets the app ask whether the user allowed "install unknown apps" for it; it does not grant it. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <application>
+        <!-- Read by PlatformAppInstaller.isSelfUpdateBuild: shows the Updates section in Settings. -->
+        <meta-data android:name="com.womenriskmap.self_update" android:value="true" />
+
+        <!-- Hands the downloaded APK to the package installer as a content:// URI. The authority must match
+             PlatformAppInstaller ("<applicationId>.update.fileprovider"). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.update.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/update_file_paths" />
+        </provider>
+
+        <!-- Deletes the downloaded APK after the app is replaced by it. -->
+        <receiver
+            android:name="com.womenriskmap.core.data.update.UpdateApkCleanupReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
