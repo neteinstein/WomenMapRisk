@@ -64,11 +64,9 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
-            echo "$GOOGLE_SERVICES_JSON" | base64 --decode > androidApp/google-services.json
-            echo "CRASHLYTICS_UPLOAD_MAPPING=true" >> "$GITHUB_ENV"
-          fi
           scripts/ci/prepare-placeholders.sh
+          [ -n "$GOOGLE_SERVICES_JSON" ] && echo "CRASHLYTICS_UPLOAD_MAPPING=true" >> "$GITHUB_ENV"
+          true
 
       # ci.yml validates the PR, but a squash/rebase merge lands a commit on main that was never itself
       # built or tested, so this is the only gate covering the exact commit about to be released.

@@ -18,6 +18,11 @@ Every job first runs `scripts/ci/prepare-placeholders.sh`, which copies the comm
 `androidApp/google-services.json.ci` into place. **These are placeholders for build validation only.** They
 contain no credentials, and the app built from them runs in demo mode.
 
+Exception: when the `GOOGLE_SERVICES_JSON` secret is set, the `build-android` job decodes it into
+`androidApp/google-services.json` instead, on pushes to `main` and manual dispatch only. PR builds keep using the
+placeholder, so forks and PRs never need the secret. Create it with
+`base64 -i androidApp/google-services.json | pbcopy` (macOS) or `base64 -w0 androidApp/google-services.json`.
+
 `.github/workflows/release-android.yml` runs on pushes to `main` and on manual dispatch. It cuts an Android
 release; see [Android release](#android-release) below.
 
@@ -35,7 +40,7 @@ across shared modules; Compose UI is excluded.
 | `SUPABASE_ANON_KEY` | secret | deploy-web, release-android | Public anon key. RLS + RPC authorisation protect the data, but keep it out of git anyway. |
 | `GOOGLE_WEB_CLIENT_ID` | secret | release-android | Google OAuth web client id |
 | `WEB_APP_URL` | variable | deploy-web, release-android | Public web URL, used in invite links (`?invite=CODE`) |
-| `GOOGLE_SERVICES_JSON` | secret (base64) | release-android (optional; placeholder + no Crashlytics without it) | Real Firebase config (both `…android` and `…android.debug` app ids) |
+| `GOOGLE_SERVICES_JSON` | secret (base64) | ci `build-android` (main/dispatch), release-android (optional; placeholder + no Crashlytics without it) | Real Firebase config (both `…android` and `…android.debug` app ids) |
 | `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | secrets | release-android (**required**) | Upload keystore. Passed to Gradle as `KEYSTORE_FILE`/`KEYSTORE_PASSWORD`/`KEY_ALIAS`/`KEY_PASSWORD`; locally `keystore.properties` works too. |
 | `ANDROID_PUBLISHER_CREDENTIALS` | secret | release-android (optional) | Raw JSON of a Play Console service account key. Without it the Play upload is skipped. |
 | `PLAY_TRACK` | variable | release-android (optional) | Play track for the upload; defaults to `internal`. |

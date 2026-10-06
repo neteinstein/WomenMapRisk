@@ -171,6 +171,7 @@ docs/spec/                # authoritative spec
 - **Committed placeholders:** `google-services.json.ci`, `GoogleService-Info.plist.ci`, `local.properties.ci`.
 - BuildKonfig generates `AppConfig` in commonMain from `local.properties` or env vars.
 - CI copies the `*.ci` files into place. Real values are GitHub secrets, used only on the release/main workflow.
+  - 2026-10-06: `build-android` decodes the `GOOGLE_SERVICES_JSON` secret (base64) into `androidApp/google-services.json` on main/dispatch; PRs still use the placeholder.
 
 ## iOS (hand-authored `iosApp/iosApp.xcodeproj/project.pbxproj`)
 - One app target. Run Script phase: `cd "$SRCROOT/.." && ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`.

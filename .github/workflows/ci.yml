@@ -28,6 +28,9 @@ jobs:
         with: { distribution: temurin, java-version: 17 }
       - uses: gradle/actions/setup-gradle@v6
       - run: scripts/ci/prepare-placeholders.sh
+        env:
+          # Real Firebase config on main/dispatch only; PRs keep building against the placeholder.
+          GOOGLE_SERVICES_JSON: ${{ github.event_name != 'pull_request' && secrets.GOOGLE_SERVICES_JSON || '' }}
       - name: Assemble debug and minified release, both flavours (debug-signed when no keystore secret)
         run: ./gradlew :androidApp:assembleDebug :androidApp:assembleRelease
       - name: Verify obfuscation
