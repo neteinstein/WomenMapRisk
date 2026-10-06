@@ -18,6 +18,11 @@ Every job first runs `scripts/ci/prepare-placeholders.sh`, which copies the comm
 `androidApp/google-services.json.ci` into place. **These are placeholders for build validation only.** They
 contain no credentials, and the app built from them runs in demo mode.
 
+Exception: when the `GOOGLE_SERVICES_JSON` secret is set, the `build-android` job decodes it into
+`androidApp/google-services.json` instead, on pushes to `main` and manual dispatch only. PR builds keep using the
+placeholder, so forks and PRs never need the secret. Create it with
+`base64 -i androidApp/google-services.json | pbcopy` (macOS) or `base64 -w0 androidApp/google-services.json`.
+
 `.github/workflows/deploy-web.yml` runs on pushes to `main`: it builds the web bundle with the Supabase secrets
 and publishes it to **GitHub Pages**.
 
@@ -31,7 +36,7 @@ across shared modules; Compose UI is excluded.
 | `SUPABASE_URL` | secret | deploy-web (and future release jobs) | Supabase project URL (`https://<ref>.supabase.co`) |
 | `SUPABASE_ANON_KEY` | secret | deploy-web | Public anon key. RLS + RPC authorisation protect the data, but keep it out of git anyway. |
 | `WEB_APP_URL` | variable | deploy-web | Public web URL, used in invite links (`?invite=CODE`) |
-| `GOOGLE_SERVICES_JSON` | secret (base64) | future Android release job | Real Firebase config (both `…android` and `…android.debug` app ids) |
+| `GOOGLE_SERVICES_JSON` | secret (base64) | ci `build-android` (main/dispatch), future Android release job | Real Firebase config (both `…android` and `…android.debug` app ids) |
 | `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | secrets | future Android release job | Writes `keystore.properties` + the keystore. `androidApp/build.gradle.kts` picks them up automatically. |
 | `CRASHLYTICS_UPLOAD_MAPPING=true` | env | future Android release job | Uploads R8 mapping files to Crashlytics |
 | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF` | secrets | future DB deploy job | `supabase link && supabase db push` |
