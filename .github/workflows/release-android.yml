@@ -76,7 +76,14 @@ jobs:
       - name: Decode signing keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          scripts/ci/decode-base64-secret.sh ANDROID_KEYSTORE_BASE64 "$RUNNER_TEMP/release.keystore"
+          # Fail here, not deep inside Gradle, if the file, store password or alias is wrong.
+          keytool -list -keystore "$RUNNER_TEMP/release.keystore" -storepass:env ANDROID_KEYSTORE_PASSWORD \
+            -alias "$ANDROID_KEY_ALIAS" > /dev/null \
+            || { echo "::error::Keystore from ANDROID_KEYSTORE_BASE64 can't be opened with ANDROID_KEYSTORE_PASSWORD or has no alias ANDROID_KEY_ALIAS."; exit 1; }
 
       # assembleRelease = assembleGithubRelease + assemblePlaystoreRelease.
       - name: Build signed release APKs and AAB

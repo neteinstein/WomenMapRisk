@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 [ -f local.properties ] || cp local.properties.ci local.properties
 if [ -n "${GOOGLE_SERVICES_JSON:-}" ]; then
-  printf '%s' "$GOOGLE_SERVICES_JSON" | base64 --decode > androidApp/google-services.json
+  scripts/ci/decode-base64-secret.sh GOOGLE_SERVICES_JSON androidApp/google-services.json
   python3 -c 'import json,sys; json.load(open(sys.argv[1]))' androidApp/google-services.json
   echo "google-services.json written from secret"
 else

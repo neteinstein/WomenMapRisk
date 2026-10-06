@@ -172,6 +172,7 @@ docs/spec/                # authoritative spec
 - BuildKonfig generates `AppConfig` in commonMain from `local.properties` or env vars.
 - CI copies the `*.ci` files into place. Real values are GitHub secrets, used only on the release/main workflow.
   - 2026-10-06: `build-android` decodes the `GOOGLE_SERVICES_JSON` secret (base64) into `androidApp/google-services.json` on main/dispatch; PRs still use the placeholder.
+  - 2026-10-06: base64 secrets (`ANDROID_KEYSTORE_BASE64`, `GOOGLE_SERVICES_JSON`) go through `scripts/ci/decode-base64-secret.sh`, which tolerates pasted whitespace/CRLF, missing padding and URL-safe base64; the release workflow then checks the keystore with `keytool` before Gradle runs.
 
 ## iOS (hand-authored `iosApp/iosApp.xcodeproj/project.pbxproj`)
 - One app target. Run Script phase: `cd "$SRCROOT/.." && ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`.
