@@ -117,6 +117,8 @@ jobs:
 
   build-web:
     name: Web build (Kotlin/JS)
+    # Web is paused for now (docs/PLAN.md deviations log, 2026-10-06). Remove this line to re-enable.
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

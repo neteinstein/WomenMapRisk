@@ -11,7 +11,7 @@
 | `unit-tests` | ubuntu | All `commonTest` suites on the JVM, plus coverage | `testDebugUnitTest koverXmlReport koverHtmlReport`. A coverage table goes to the job summary; reports are uploaded as artifacts. |
 | `lint` | ubuntu | Style, Android lint, generated strings in sync | `strings.py && git diff --exit-code`, `ktlintCheck :androidApp:lintGithubDebug :androidApp:lintPlaystoreDebug` |
 | `build-ios` | macos | Hand-authored Xcode project + Kotlin framework embed | `xcodebuild … -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build` |
-| `build-web` | ubuntu | Kotlin/JS production bundle | `:composeApp:jsBrowserDistribution` (uploads `web-dist`) |
+| `build-web` | ubuntu | Kotlin/JS production bundle. **Disabled for now** (`if: false`). | `:composeApp:jsBrowserDistribution` (uploads `web-dist`) |
 | `supabase-db` | ubuntu | Migrations, seed and pgTAP on the **real** Supabase stack | `supabase db start && supabase db reset && supabase test db` |
 
 Every job first runs `scripts/ci/prepare-placeholders.sh`, which copies the committed `local.properties.ci` and
@@ -26,8 +26,8 @@ placeholder, so forks and PRs never need the secret. Create it with
 `.github/workflows/release-android.yml` runs on pushes to `main` and on manual dispatch. It cuts an Android
 release; see [Android release](#android-release) below.
 
-`.github/workflows/deploy-web.yml` runs on pushes to `main`: it builds the web bundle with the Supabase secrets
-and publishes it to **GitHub Pages**.
+`.github/workflows/deploy-web.yml` builds the web bundle with the Supabase secrets and publishes it to
+**GitHub Pages**. Web is paused for now, so it runs on manual dispatch only (no push trigger).
 
 Coverage is currently report-only (no failing threshold). Baseline on 2026-10-05: 63% lines and 38% branches
 across shared modules; Compose UI is excluded.
@@ -56,7 +56,7 @@ vars first, then from `local.properties`, by `:core:data:generateAppConfig`.
 |---|---|---|
 | Android | CI builds an **R8-minified release signed with the debug key** (validation only). `release-android.yml` builds the signed APK + AAB, publishes a GitHub Release and, optionally, uploads to Play. | Create an upload keystore and add the secrets; do the first Play upload by hand; then add `ANDROID_PUBLISHER_CREDENTIALS`. |
 | iOS | CI builds **unsigned for the simulator** only. Crashlytics on iOS ⏸. | Set `TEAM_ID` in `iosApp/Configuration/Config.xcconfig` (or via CI); add a signing certificate and provisioning profile (App Store Connect API key); archive + TestFlight. |
-| Web | Deployed to GitHub Pages by `deploy-web.yml`. It runs in demo mode until the Supabase secrets are set. | Enable Pages (Settings → Pages → Source: GitHub Actions); add the secrets. |
+| Web | **Paused:** `deploy-web.yml` runs on manual dispatch only. When run, it deploys to GitHub Pages and runs in demo mode until the Supabase secrets are set. | Enable Pages (Settings → Pages → Source: GitHub Actions); add the secrets. |
 | Database | Migrations are tested in CI. **Not deployed automatically.** | `supabase link --project-ref …` then `supabase db push`, manually or via a protected workflow. Configure auth redirect URLs (`womenriskmap://login-callback`, the web URL) and the Google provider in the dashboard. |
 
 ## Android release
