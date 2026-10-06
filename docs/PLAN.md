@@ -253,6 +253,9 @@ Optional `deploy-web.yml` on main publishes the wasm build to GitHub Pages (free
 - **2026-10-06: web CI paused.** The `build-web` job in `ci.yml` is disabled (`if: false`) and `deploy-web.yml` no longer
   runs on pushes to `main` (manual dispatch only). The `js` target and its code stay in place. To re-enable, remove the
   `if: false` line and restore the push trigger.
+- **2026-10-06: Google sign-in hidden.** The "or" divider and Google button on the auth screen are behind
+  `GOOGLE_SIGN_IN_ENABLED = false` in `AuthScreen.kt`. `SessionRepository.signInWithGoogle()`, the ViewModel action and
+  the `pending_invite` invite gate stay in place. To re-enable, set the flag to `true` and enable the provider in Supabase.
 
 ## Progress tracking: `docs/PLAN.md` in the repo
 The first action of implementation is to copy this whole plan into the repo as **`docs/PLAN.md`**. It becomes the living tracker.
