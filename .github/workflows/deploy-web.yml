@@ -1,11 +1,11 @@
-# Publishes the web app (Kotlin/JS) to GitHub Pages on every push to main.
+# Publishes the web app (Kotlin/JS) to GitHub Pages.
+# Web is paused for now (docs/PLAN.md deviations log, 2026-10-06): manual dispatch only.
+# To re-enable automatic deploys, restore `push: branches: [main]` under `on:`.
 # Requires: repo Settings → Pages → Source = GitHub Actions, and the Supabase secrets below.
 # Without secrets the build still works and ships in demo mode (read-only sample data).
 name: Deploy web
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
